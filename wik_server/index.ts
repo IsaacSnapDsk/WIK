@@ -8,20 +8,20 @@ const express = require("express");
 const http = require("http");
 const mongoose = require("mongoose");
 
-const app = express();
+// const app = express();
 const port = process.env.PORT || 3000;
-const server = http.createServer(app);
-const serverRoom = require("./models/room");
-const serverPlayer = require("./models/player");
+const server = http.createServer();
+const serverRoom = require("./src/models/room");
+const serverPlayer = require("./src/models/player");
 var io = require("socket.io")(server);
 
-// middle ware
-app.use(express.json());
+// middle waregit
+// app.use(express.json());
 
 const rounds: Round[] = []
 
-const DB =
-    "mongodb+srv://rivaan:test123@cluster0.rmhtu.mongodb.net/myFirstDatabase?retryWrites=true&w=majority";
+// const DB =
+//     "mongodb+srv://rivaan:test123@cluster0.rmhtu.mongodb.net/myFirstDatabase?retryWrites=true&w=majority";
 
 
 //  Sets the turn from Waiting to Calculating
@@ -88,25 +88,20 @@ const stopVoting = async (room): Promise<Room> => {
     return room
 }
 
-// const setNextTurn = (room: Room): Turn => {
-//     //  Grab our current round
-//     const round = room.rounds[room.currentRound]
-
-//     //  Grab our round's current turn
-//     const turn = round.turn
-
-//     //  Based on this turn, we want to set the next turn
-//     const nextTurn = {
-//         Voting: () => setWaitingTurn(round, room),
-//         Waiting: () => setCalculatingTurn(round, room)
-//     }[turn]()
-
-//     //  Return our turn
-//     return nextTurn
-// }
 
 
 io.on("connection", (socket) => {
+    /// Test listener
+    /// This will listen to "test" events from our client and then
+    /// send a "testSuccess" event to ALL clients connected
+    socket.on("test", async ({ message }) => {
+        console.log('server test success: ', message)
+        /// Test event
+        /// This sends a "testSuccess" event to all clients
+        socket.emit("testSuccess", "hello from server")
+
+    })
+
     console.log("connected!");
     socket.on("createRoom", async ({ roomName, nickname, maxRounds }) => {
         console.log(nickname);
@@ -317,14 +312,14 @@ io.on("connection", (socket) => {
     // });
 });
 
-mongoose
-    .connect(DB)
-    .then(() => {
-        console.log("Connection successful!");
-    })
-    .catch((e) => {
-        console.log(e);
-    });
+// mongoose
+//     .connect(DB)
+//     .then(() => {
+//         console.log("Connection successful!");
+//     })
+//     .catch((e) => {
+//         console.log(e);
+//     });
 
 server.listen(port, "0.0.0.0", () => {
     console.log(`Server started and running on port ${port}`);
