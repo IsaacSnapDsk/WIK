@@ -36,7 +36,7 @@ const roundSchema = new mongoose.Schema({
         type: Boolean,
         default: false
     },
-    votes: [voteSchema]
+    // votes: [voteSchema]
 });
 
 const roundModel = mongoose.model("Round", roundSchema);

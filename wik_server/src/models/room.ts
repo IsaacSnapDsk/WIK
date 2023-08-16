@@ -32,8 +32,8 @@ const roomSchema = new mongoose.Schema({
         type: Number,
         default: 1
     },
-    players: [playerSchema],
-    rounds: [roundSchema],
+    // players: [playerSchema],
+    // rounds: [roundSchema],
 });
 
 const roomModel = mongoose.model("Room", roomSchema);
