@@ -4,7 +4,8 @@
   "description": "will it kill ya",
   "main": "index.ts",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node index.ts",
+    "dev": "nodemon index.ts"
   },
   "author": "",
   "license": "ISC",
@@ -12,6 +13,8 @@
     "express": "^4.18.2",
     "http": "^0.0.1-security",
     "mongoose": "^7.4.3",
+    "nodemon": "^3.0.1",
+    "socket.io": "^4.7.2",
     "typescript": "^5.1.6"
   },
   "devDependencies": {
