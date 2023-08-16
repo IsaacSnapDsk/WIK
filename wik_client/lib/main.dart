@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:wik_client/src/services/sockets_service.dart';
 
 void main() {
   runApp(const MyApp());
@@ -57,6 +58,16 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   int _counter = 0;
 
+  //  Instance of our socket service
+  final SocketsService _socketsSrv = SocketsService();
+
+  @override
+  void initState() {
+    super.initState();
+
+    _socketsSrv.testSuccessListener(context);
+  }
+
   void _incrementCounter() {
     setState(() {
       // This call to setState tells the Flutter framework that something has
@@ -111,6 +122,10 @@ class _MyHomePageState extends State<MyHomePage> {
             Text(
               '$_counter',
               style: Theme.of(context).textTheme.headlineMedium,
+            ),
+            ElevatedButton(
+              child: const Text("kill me"),
+              onPressed: () => _socketsSrv.test("hello from client"),
             ),
           ],
         ),
