@@ -4,6 +4,7 @@ import { Vote } from "./vote"
 
 export interface Round {
     no: number
+    kill: boolean
     turn: Turn
     half: boolean
     votes: Vote[]
@@ -21,6 +22,9 @@ const roundSchema = new mongoose.Schema({
         required: true,
         type: Number,
         default: 1,
+    },
+    kill: {
+        type: Boolean
     },
     turn: {
         required: true,

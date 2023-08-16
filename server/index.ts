@@ -1,6 +1,7 @@
 import { Player } from "./src/models/player";
 import { Room } from "./src/models/room";
 import { Round, Turn } from "./src/models/round";
+import { Vote } from "./src/models/vote";
 
 // importing modules
 const express = require("express");
@@ -11,6 +12,7 @@ const app = express();
 const port = process.env.PORT || 3000;
 const server = http.createServer(app);
 const serverRoom = require("./models/room");
+const serverPlayer = require("./models/player");
 var io = require("socket.io")(server);
 
 // middle ware
@@ -22,14 +24,43 @@ const DB =
     "mongodb+srv://rivaan:test123@cluster0.rmhtu.mongodb.net/myFirstDatabase?retryWrites=true&w=majority";
 
 
-//  TODO make typescript integrate with our mongo schemas
+//  Sets the turn from Waiting to Calculating
+const startCalculating = async (room): Promise<Object[]> => {
+    //  Grab our current round
+    const round = room.rounds[room.currentRound]
 
+    //  Grab the players from the current room
+    // const players = room.players.filter((x: Player) => x.vote)
 
-// const setCalculatingTurn = async (round: Round, room): Promise<Turn> => {
-//     //  
-// }
+    //  Grab our votes
+    const votes = room.votes
 
-const stopVoting = async (room): Promise<Turn> => {
+    //  Create our array of results
+    const results = []
+
+    //  Iterate through each vote to compute results
+    for (let i = 0; i < votes.length; i++) {
+        //  Check if this player won
+        const win = votes[i].kill == room.kill
+
+        //  Grab the players current vote
+        const result = {
+            win: win,
+            playerId: votes[i].playerId,
+            wager: votes[i].wager,
+            amount: votes[i].amount
+        }
+
+        //  Add this to our array of results
+        results.push(result)
+    }
+
+    //  Return our results array
+    return results
+}
+
+//  Sets the turn from Voting to Waiting
+const stopVoting = async (room): Promise<Room> => {
     //  Grab our current round
     const round = room.rounds[room.currentRound]
 
@@ -54,7 +85,7 @@ const stopVoting = async (room): Promise<Turn> => {
     //  TODO update our round's turn in the DB
     //  TODO update our list of rounds in the DB
 
-    return Turn.Voting
+    return room
 }
 
 // const setNextTurn = (room: Room): Turn => {
@@ -77,30 +108,86 @@ const stopVoting = async (room): Promise<Turn> => {
 
 io.on("connection", (socket) => {
     console.log("connected!");
-    // socket.on("createRoom", async ({ nickname }) => {
-    //     console.log(nickname);
-    //     try {
-    //         // room is created
-    //         let room = new Room();
-    //         let player = {
-    //             socketID: socket.id,
-    //             nickname,
-    //             playerType: "X",
-    //         };
-    //         room.players.push(player);
-    //         room.turn = player;
-    //         room = await room.save();
-    //         console.log(room);
-    //         const roomId = room._id.toString();
+    socket.on("createRoom", async ({ roomName, nickname, maxRounds }) => {
+        console.log(nickname);
+        try {
+            // Create a new room
+            const room = new serverRoom({
+                name: roomName,
+                maxRounds: maxRounds,
+                rounds: []
+            });
 
-    //         socket.join(roomId);
-    //         // io -> send data to everyone
-    //         // socket -> sending data to yourself
-    //         io.to(roomId).emit("createRoomSuccess", room);
-    //     } catch (e) {
-    //         console.log(e);
-    //     }
-    // });
+            //  Create our player (also the GM)
+            const player = new serverPlayer({
+                master: true,
+                socketID: socket.id,
+                name: nickname
+            })
+
+            //  Add our player to the room
+            room.players.push(player);
+
+            //  Create our first round
+            const round = {
+                no: 1,
+                votes: []
+            }
+
+            //  Set our first round in the room
+            room.rounds.push(round)
+
+            //  Save our room
+            const savedRoom = await room.save();
+            console.log(savedRoom);
+
+            //  Grab our room id
+            const roomId = room._id.toString();
+
+            //  Subscribe to this room's connection
+            socket.join(roomId);
+            // io -> send data to everyone
+            // socket -> sending data to yourself
+            io.to(roomId).emit("createRoomSuccess", room);
+        } catch (e) {
+            console.log(e);
+        }
+    });
+
+    socket.on("postVote", async ({ roomId, vote }) => {
+        try {
+            //  Grab our current room
+            const room = await serverRoom.findById(roomId)
+
+            //  Find the player matching this vote id
+            const player = await serverPlayer.findById(vote.playerId)
+
+            //  Grab our current round
+            const round = room.rounds[room.currentRound]
+
+            //  Find the index of the vote for this player
+            const idx = round.votes.findIndex((x: Vote) => x.playerId = player._id)
+
+            //  If we found the index then update the vote
+            if (idx !== -1) round.votes[idx] = vote
+            else round.push(vote)
+
+            //  Update our room
+            room.rounds[room.currentRound] = round
+            const savedRoom = room.save()
+
+            //  Update the player's vote
+            player.vote = vote
+
+            //  Save our player
+            const savedPlayer = await player.save()
+
+            //  Inform client about vote
+            io.to(roomId).emit("votePostSuccess", round)
+        } catch (e) {
+            console.log(`Error posting vote ${e}`)
+        }
+    })
 
     socket.on("stopVoting", async ({ roomId }) => {
         try {
@@ -112,13 +199,46 @@ io.on("connection", (socket) => {
             //  TODO make it so players cannot join in the middle
 
             //  Set our next turn
-            const turn = stopVoting(room)
+            const savedRoom = await stopVoting(room)
+
+
+            //  Grab the current round
+            const currentRound = savedRoom.rounds[savedRoom.currentRound]
 
             //  Return our new turn
-            io.to(roomId).emit("changeTurnSuccess", turn)
+            io.to(roomId).emit("changeTurnSuccess", currentRound)
         }
         catch (e) {
-            console.log(`Error changing turn ${e}`)
+            console.log(`Error stopping voting ${e}`)
+        }
+    })
+
+    socket.on("startCalculating", async ({ roomId, kill }) => {
+        try {
+            //  Grab our current room
+            const room = await serverRoom.findById(roomId)
+
+            //  Set the current round's result
+            room.kill = kill
+
+            //  Start calculating
+            const results = await startCalculating(room)
+
+            //  Save our round
+            room.rounds[room.currentRound].turn = Turn.Results
+            const savedRoom = await room.save()
+
+            //  Notify results
+            results.forEach(x => io.to(roomId).emit('resultCalculated', x))
+
+            //  Grab the current round
+            const currentRound = savedRoom.rounds[savedRoom.currentRound]
+
+            //  Return our new turn
+            io.to(roomId).emit("changeTurnSuccess", currentRound)
+        }
+        catch (e) {
+            console.log(`Error starting calculating ${e}`)
         }
     })
 

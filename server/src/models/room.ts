@@ -14,6 +14,10 @@ export interface Room {
 }
 
 const roomSchema = new mongoose.Schema({
+    name: {
+        type: String,
+        default: null
+    },
     maxRounds: {
         type: Number,
         default: 6,

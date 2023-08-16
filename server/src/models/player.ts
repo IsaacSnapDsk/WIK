@@ -12,6 +12,10 @@ export interface Player {
 }
 
 const playerSchema = new mongoose.Schema({
+    master: {
+        type: Boolean,
+        default: false
+    },
     name: {
         type: String,
         trim: true,
