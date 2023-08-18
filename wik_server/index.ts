@@ -1,10 +1,11 @@
+require('dotenv').config();
+
 import { Player } from "./src/models/player";
 import { Room } from "./src/models/room";
-import { Round, Turn } from "./src/models/round";
+import { Turn } from "./src/models/round";
 import { Vote } from "./src/models/vote";
 
 // importing modules
-const express = require("express");
 const http = require("http");
 const mongoose = require("mongoose");
 
@@ -15,14 +16,16 @@ const serverRoom = require("./src/models/room");
 const serverPlayer = require("./src/models/player");
 var io = require("socket.io")(server);
 
-// middle waregit
-// app.use(express.json());
+// const rounds: Round[] = []
 
-const rounds: Round[] = []
+//  Grab our password from our env
+const password = process.env.MONGO_PASSWORD
 
-// const DB =
-//     "mongodb+srv://rivaan:test123@cluster0.rmhtu.mongodb.net/myFirstDatabase?retryWrites=true&w=majority";
+//  Grab our URL from our env
+const url = process.env.MONGO_URL
 
+//  Replace the <password> query with our actual password to get the real url
+const DB = url.replace("<password>", password)
 
 //  Sets the turn from Waiting to Calculating
 const startCalculating = async (room): Promise<Object[]> => {
@@ -89,7 +92,7 @@ const stopVoting = async (room): Promise<Room> => {
 }
 
 
-
+/// SOCKET CONNECTION
 io.on("connection", (socket) => {
     /// Test listener
     /// This will listen to "test" events from our client and then
@@ -101,6 +104,7 @@ io.on("connection", (socket) => {
         socket.emit("testSuccess", "hello from server")
 
     })
+
 
     console.log("connected!");
     socket.on("createRoom", async ({ roomName, nickname, maxRounds }) => {
@@ -114,23 +118,26 @@ io.on("connection", (socket) => {
             });
 
             //  Create our player (also the GM)
-            const player = new serverPlayer({
-                master: true,
-                socketID: socket.id,
+            // const player = new serverPlayer({
+            //     socketID: socket.id,
+            //     name: nickname
+            // })
+            const player = {
+                socketId: socket.id,
                 name: nickname
-            })
+            }
 
             //  Add our player to the room
             room.players.push(player);
 
             //  Create our first round
-            const round = {
-                no: 1,
-                votes: []
-            }
+            // const round = {
+            //     no: 1,
+            //     votes: []
+            // }
 
-            //  Set our first round in the room
-            room.rounds.push(round)
+            // //  Set our first round in the room
+            // room.rounds.push(round)
 
             //  Save our room
             const savedRoom = await room.save();
@@ -143,9 +150,45 @@ io.on("connection", (socket) => {
             socket.join(roomId);
             // io -> send data to everyone
             // socket -> sending data to yourself
-            io.to(roomId).emit("createRoomSuccess", room);
+            io.to(roomId).emit("createRoomSuccess", savedRoom);
         } catch (e) {
             console.log(e);
+        }
+    });
+
+    socket.on("joinRoom", async ({ roomId, name }) => {
+        try {
+            //  Find our room
+            const room = await serverRoom.findById(roomId)
+
+            //  If it isn't found, return an error
+            if (!room) return socket.emit("errorOccurred", "Please enter a valid room ID.")
+
+            //  Else, we found our room so lets create a player to connect to it
+            // const player = new serverPlayer({
+            //     socketId: socket.id,
+            //     name: name
+            // })
+
+            const player = {
+                socketId: socket.id,
+                name: name
+            }
+
+            //  Add our player to the room
+            room.players.push(player)
+
+            //  Save our room
+            const savedRoom = await room.save()
+            console.log('saved room', savedRoom)
+
+            //  Subscribe to this room's connection
+            socket.join(roomId)
+
+            //  Notify about joining
+            io.to(roomId).emit("joinRoomSuccess", savedRoom)
+        } catch (e) {
+            console.log('nahhaha')
         }
     });
 
@@ -291,36 +334,17 @@ io.on("connection", (socket) => {
     //         console.log(e);
     //     }
     // });
-
-    // socket.on("winner", async ({ winnerSocketId, roomId }) => {
-    //     try {
-    //         let room = await Room.findById(roomId);
-    //         let player = room.players.find(
-    //             (playerr) => playerr.socketID == winnerSocketId
-    //         );
-    //         player.points += 1;
-    //         room = await room.save();
-
-    //         if (player.points >= room.maxRounds) {
-    //             io.to(roomId).emit("endGame", player);
-    //         } else {
-    //             io.to(roomId).emit("pointIncrease", player);
-    //         }
-    //     } catch (e) {
-    //         console.log(e);
-    //     }
-    // });
 });
 
-// mongoose
-//     .connect(DB)
-//     .then(() => {
-//         console.log("Connection successful!");
-//     })
-//     .catch((e) => {
-//         console.log(e);
-//     });
+mongoose
+    .connect(DB)
+    .then(() => {
+        console.log("Connection successful!");
+    })
+    .catch((e) => {
+        console.log('mongoose error', e);
+    });
 
-server.listen(port, "0.0.0.0", () => {
+server.listen(port, "localhost", () => {
     console.log(`Server started and running on port ${port}`);
 });
