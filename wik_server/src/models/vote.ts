@@ -13,6 +13,19 @@ export enum Wager {
     BB
 }
 
+const betSchema = new mongoose.Schema({
+    wager: {
+        required: true,
+        type: String,
+        default: 'Shot',
+    },
+    amount: {
+        required: true,
+        type: Number,
+        default: 1
+    }
+});
+
 const voteSchema = new mongoose.Schema({
     playerId: {
         required: true,
@@ -23,15 +36,9 @@ const voteSchema = new mongoose.Schema({
         type: Boolean,
         default: true,
     },
-    wager: {
+    bet: {
         required: true,
-        type: String,
-        default: 'Shot',
-    },
-    amount: {
-        required: true,
-        type: Number,
-        default: 1
+        type: Object
     }
 });
 

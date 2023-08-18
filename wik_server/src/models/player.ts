@@ -12,10 +12,6 @@ export interface Player {
 }
 
 const playerSchema = new mongoose.Schema({
-    master: {
-        type: Boolean,
-        default: false
-    },
     name: {
         type: String,
         trim: true,
@@ -31,7 +27,7 @@ const playerSchema = new mongoose.Schema({
         type: Number,
         default: 0,
     },
-    shotes: {
+    shots: {
         type: Number,
         default: 0,
     },

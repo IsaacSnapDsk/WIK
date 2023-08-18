@@ -32,7 +32,7 @@ const roomSchema = new mongoose.Schema({
         type: Number,
         default: 1
     },
-    // players: [playerSchema],
+    players: [playerSchema],
     // rounds: [roundSchema],
 });
 
