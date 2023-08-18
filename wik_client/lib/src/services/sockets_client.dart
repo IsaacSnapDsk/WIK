@@ -14,7 +14,7 @@ class SocketsClient {
   /// If the connection already exists, it just returns the existing connection
   SocketsClient._init() {
     //  Establish our client connection to the server
-    clientSocket = IO.io('http://yourip:3000', <String, dynamic>{
+    clientSocket = IO.io('http://localhost:3000', <String, dynamic>{
       //  We have to specify "websocket" under transports to allow connection via web
       'transports': ['websocket'],
       'autoConnect': false,

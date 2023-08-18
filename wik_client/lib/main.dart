@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:wik_client/src/services/room_view_model.dart';
 import 'package:wik_client/src/services/sockets_service.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(const ProviderScope(child: MyApp()));
 }
 
 class MyApp extends StatelessWidget {
@@ -37,7 +40,7 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class MyHomePage extends StatefulWidget {
+class MyHomePage extends ConsumerStatefulWidget {
   const MyHomePage({super.key, required this.title});
 
   // This widget is the home page of your application. It is stateful, meaning
@@ -52,20 +55,35 @@ class MyHomePage extends StatefulWidget {
   final String title;
 
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
+  ConsumerState<MyHomePage> createState() => _MyHomePageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
+class _MyHomePageState extends ConsumerState<MyHomePage> {
   int _counter = 0;
 
-  //  Instance of our socket service
-  final SocketsService _socketsSrv = SocketsService();
+  /// The name we want to use for our room
+  String? _roomName;
+
+  /// The nickname for our player
+  String? _nickname;
+
+  /// The max number of rounds we want
+  int? _maxRounds;
+
+  /// Determines if we can submit the form or not
+  bool _canSubmit = false;
 
   @override
   void initState() {
     super.initState();
 
-    _socketsSrv.testSuccessListener(context);
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      //  Get our view model
+      final vm = ref.watch(roomViewModel);
+
+      vm.subscribeToTestSuccess(context);
+      vm.subscribeToCreateRoomSuccess(context);
+    });
   }
 
   void _incrementCounter() {
@@ -79,8 +97,48 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
+  void _calcCanSubmit() {
+    setState(() {
+      //  If ANY of our values are null, this is false
+      final canSubmit =
+          _maxRounds != null && _nickname != null && _roomName != null;
+
+      //  Set our value to whether we are falsey or not
+      _canSubmit = canSubmit;
+    });
+  }
+
+  //
+  void _onMaxRoundsChanged(String val) {
+    //  Parse the value into an integer
+    final num = val.isNotEmpty ? int.parse(val) : null;
+
+    //  Update our value
+    _maxRounds = num;
+
+    //  Check if we can submit or not
+    _calcCanSubmit();
+  }
+
+  void _onNicknameChanged(String val) {
+    //  Update our nickname value
+    _nickname = val;
+
+    //  Check if we can submit or not
+    _calcCanSubmit();
+  }
+
+  void _onRoomNameChanged(String val) {
+    //  Update our room name value
+    _roomName = val;
+
+    //  Check if we can submit or not
+    _calcCanSubmit();
+  }
+
   @override
   Widget build(BuildContext context) {
+    final vm = ref.watch(roomViewModel);
     // This method is rerun every time setState is called, for instance as done
     // by the _incrementCounter method above.
     //
@@ -116,16 +174,38 @@ class _MyHomePageState extends State<MyHomePage> {
           // wireframe for each widget.
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            const Text(
-              'You have pushed the button this many times:',
-            ),
+            // const Text(
+            //   'You have pushed the button this many times:',
+            // ),
             Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
+                "You are currently ${vm.room != null ? '' : 'NOT '}in a room."),
+            if (vm.room != null) Text("Room Name: ${vm.room!.name}"),
+            TextField(
+              decoration: const InputDecoration(hintText: "Enter room name"),
+              onChanged: _onRoomNameChanged,
+            ),
+            TextField(
+              decoration:
+                  const InputDecoration(hintText: "Enter your nickname"),
+              onChanged: _onNicknameChanged,
+            ),
+            TextField(
+              decoration: const InputDecoration(hintText: "Enter max rounds"),
+              keyboardType: TextInputType.number,
+              inputFormatters: <TextInputFormatter>[
+                // for below version 2 use this
+                FilteringTextInputFormatter.allow(RegExp(r'[0-9]')),
+// for version 2 and greater youcan also use this
+                FilteringTextInputFormatter.digitsOnly
+              ],
+              onChanged: _onMaxRoundsChanged,
             ),
             ElevatedButton(
-              child: const Text("kill me"),
-              onPressed: () => _socketsSrv.test("hello from client"),
+              child: const Text("Create New Room"),
+              // onPressed: () => vm.socketsService.test("hello from client"),
+              onPressed: () => _canSubmit
+                  ? vm.createRoom(_roomName!, _nickname!, _maxRounds!)
+                  : null,
             ),
           ],
         ),
