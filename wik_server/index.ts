@@ -10,6 +10,7 @@ const http = require("http");
 const mongoose = require("mongoose");
 
 // const app = express();
+const host = process.env.HOST || "localhost";
 const port = process.env.PORT || 3000;
 const server = http.createServer();
 const serverRoom = require("./src/models/room");
@@ -345,6 +346,6 @@ mongoose
         console.log('mongoose error', e);
     });
 
-server.listen(port, "localhost", () => {
+server.listen(port, host, () => {
     console.log(`Server started and running on port ${port}`);
 });
