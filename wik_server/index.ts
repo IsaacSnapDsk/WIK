@@ -1,4 +1,5 @@
 require('dotenv').config();
+const crypto = require('crypto')
 
 import { Player } from "./src/models/player";
 import { Room } from "./src/models/room";
@@ -13,8 +14,9 @@ const mongoose = require("mongoose");
 const host = process.env.HOST || "localhost";
 const port = process.env.PORT || 3000;
 const server = http.createServer();
-const serverRoom = require("./src/models/room");
-const serverPlayer = require("./src/models/player");
+const { gameMasterModel } = require("./src/models/game_master")
+const { roomModel } = require("./src/models/room");
+const { playerModel } = require("./src/models/player");
 var io = require("socket.io")(server);
 
 // const rounds: Round[] = []
@@ -92,6 +94,10 @@ const stopVoting = async (room): Promise<Room> => {
     return room
 }
 
+const generateSecret = (): String => {
+    return crypto.randomBytes(64).toString('hex');
+}
+
 
 /// SOCKET CONNECTION
 io.on("connection", (socket) => {
@@ -103,55 +109,51 @@ io.on("connection", (socket) => {
         /// Test event
         /// This sends a "testSuccess" event to all clients
         socket.emit("testSuccess", "hello from server")
-
     })
 
-
     console.log("connected!");
-    socket.on("createRoom", async ({ roomName, nickname, maxRounds }) => {
-        console.log(nickname);
+    socket.on("createRoom", async ({ roomName, maxRounds }) => {
         try {
             // Create a new room
-            const room = new serverRoom({
+            const room = new roomModel({
                 name: roomName,
                 maxRounds: maxRounds,
                 rounds: []
             });
 
-            //  Create our player (also the GM)
-            // const player = new serverPlayer({
-            //     socketID: socket.id,
-            //     name: nickname
-            // })
-            const player = {
-                socketId: socket.id,
-                name: nickname
-            }
+            //  Grab our room id
+            const roomId = room._id.toString();
 
-            //  Add our player to the room
-            room.players.push(player);
+            //  Create our game master
+            const gameMaster = new gameMasterModel({
+                socketId: socket.id,
+                roomId: roomId,
+                secret: generateSecret()
+            })
+
+            //  Add our game master to the room
+            room.gameMaster = gameMaster
 
             //  Create our first round
-            // const round = {
-            //     no: 1,
-            //     votes: []
-            // }
+            const round = {
+                no: 1,
+                votes: []
+            }
 
-            // //  Set our first round in the room
-            // room.rounds.push(round)
+            //  Set our first round in the room
+            room.rounds.push(round)
 
             //  Save our room
             const savedRoom = await room.save();
-            console.log(savedRoom);
-
-            //  Grab our room id
-            const roomId = room._id.toString();
 
             //  Subscribe to this room's connection
             socket.join(roomId);
             // io -> send data to everyone
             // socket -> sending data to yourself
-            io.to(roomId).emit("createRoomSuccess", savedRoom);
+            io.to(roomId).emit("createRoomSuccess", {
+                room: savedRoom,
+                secret: gameMaster.secret,
+            });
         } catch (e) {
             console.log(e);
         }
@@ -160,21 +162,16 @@ io.on("connection", (socket) => {
     socket.on("joinRoom", async ({ roomId, name }) => {
         try {
             //  Find our room
-            const room = await serverRoom.findById(roomId)
+            const room = await roomModel.findById(roomId)
 
             //  If it isn't found, return an error
             if (!room) return socket.emit("errorOccurred", "Please enter a valid room ID.")
 
             //  Else, we found our room so lets create a player to connect to it
-            // const player = new serverPlayer({
-            //     socketId: socket.id,
-            //     name: name
-            // })
-
-            const player = {
+            const player = new playerModel({
                 socketId: socket.id,
                 name: name
-            }
+            })
 
             //  Add our player to the room
             room.players.push(player)
@@ -196,10 +193,10 @@ io.on("connection", (socket) => {
     socket.on("postVote", async ({ roomId, vote }) => {
         try {
             //  Grab our current room
-            const room = await serverRoom.findById(roomId)
+            const room = await roomModel.findById(roomId)
 
             //  Find the player matching this vote id
-            const player = await serverPlayer.findById(vote.playerId)
+            const player = await playerModel.findById(vote.playerId)
 
             //  Grab our current round
             const round = room.rounds[room.currentRound]
@@ -233,7 +230,7 @@ io.on("connection", (socket) => {
             //  TODO add validation that prevents changing under following circumstances:
 
             //  Grab our current room
-            const room = await serverRoom.findById(roomId)
+            const room = await roomModel.findById(roomId)
 
             //  TODO make it so players cannot join in the middle
 
@@ -255,7 +252,7 @@ io.on("connection", (socket) => {
     socket.on("startCalculating", async ({ roomId, kill }) => {
         try {
             //  Grab our current room
-            const room = await serverRoom.findById(roomId)
+            const room = await roomModel.findById(roomId)
 
             //  Set the current round's result
             room.kill = kill
@@ -292,7 +289,7 @@ io.on("connection", (socket) => {
     //         if (room.isJoin) {
     //             let player = {
     //                 nickname,
-    //                 socketID: socket.id,
+    //                 socketId: socket.id,
     //                 playerType: "O",
     //             };
     //             socket.join(roomId);
