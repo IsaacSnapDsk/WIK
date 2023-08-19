@@ -2,8 +2,11 @@ import { Player } from "./player";
 import { Round } from "./round";
 
 const mongoose = require("mongoose");
-const playerSchema = require("./player");
-const roundSchema = require("./round");
+
+//  Grab our schemas
+const { gameMasterSchema } = require('./game_master')
+const { playerSchema } = require('./player');
+const { roundSchema } = require('./round')
 
 export interface Room {
     maxRounds: number
@@ -32,9 +35,13 @@ const roomSchema = new mongoose.Schema({
         type: Number,
         default: 1
     },
+    gameMaster: gameMasterSchema,
     players: [playerSchema],
-    // rounds: [roundSchema],
+    rounds: [roundSchema],
 });
 
 const roomModel = mongoose.model("Room", roomSchema);
-module.exports = roomModel;
+module.exports = {
+    roomModel: roomModel,
+    roomSchema: roomSchema
+};

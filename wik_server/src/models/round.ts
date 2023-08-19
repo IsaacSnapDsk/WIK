@@ -40,4 +40,7 @@ const roundSchema = new mongoose.Schema({
 });
 
 const roundModel = mongoose.model("Round", roundSchema);
-module.exports = roundModel;
+module.exports = {
+    roundModel: roundModel,
+    roundSchema: roundSchema
+};

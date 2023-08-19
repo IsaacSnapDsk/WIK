@@ -16,7 +16,7 @@ const playerSchema = new mongoose.Schema({
         type: String,
         trim: true,
     },
-    socketID: {
+    socketId: {
         type: String,
     },
     wins: {
@@ -41,4 +41,8 @@ const playerSchema = new mongoose.Schema({
     },
 });
 
-module.exports = playerSchema;
+const playerModel = mongoose.model("Player", playerSchema);
+module.exports = {
+    playerModel: playerModel,
+    playerSchema: playerSchema
+};
