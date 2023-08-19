@@ -28,8 +28,26 @@ class SocketsService {
     );
   }
 
-  void createRoom(String roomName, String nickname, int maxRounds) {
-    _client.emit('createRoom', {'roomName': roomName});
+  //  Sends a "createRoom" event to our Server
+  void createRoom(String roomName, int maxRounds) {
+    _client.emit(
+      'createRoom',
+      {
+        'roomName': roomName,
+        'maxRounds': maxRounds,
+      },
+    );
+  }
+
+  //  Sends a "joinRoom" event to our Server
+  void joinRoom(String roomId, String nickname) {
+    _client.emit(
+      'joinRoom',
+      {
+        'roomId': roomId,
+        'nickname': nickname,
+      },
+    );
   }
 
   /// SOCKET LISTENERS
@@ -53,9 +71,21 @@ class SocketsService {
     );
   }
 
-  /// Listens to the "createRoomSuccess" event
   void createRoomSuccessListener(BuildContext context) {
     _client.on('createRoomSuccess', (response) {
+      //  Grab our room view model
+      final vm = ref.watch(roomViewModel);
+
+      //  TODO build out what happens when room is created
+
+      //  Inform the view model
+      vm.createRoomSuccess();
+    });
+  }
+
+  /// Listens to the "joinRoomSuccess" event
+  void joinRoomSuccessListener(BuildContext context) {
+    _client.on('joinRoomSuccess', (response) {
       //  Grab our room view model
       final vm = ref.watch(roomViewModel);
 
@@ -64,34 +94,26 @@ class SocketsService {
 
       //  Iterate through the players
       for (var player in response['players']) {
-        players.add(
-          Player(
-            id: player['_id'] as String,
-            wins: player['wins'] as int,
-            shots: player['shots'] as int,
-            bb: player['bb'] as int,
-            drinks: player['drinks'] as int,
-          ),
-        );
+        players.add(Player.fromJson(player));
       }
 
       //  Convert our room from json into an actual room
-      final room = Room(
-        // id: response['id'] as String,
-        id: response['_id'] as String,
-        name: response['name'] as String,
-        maxRounds: response['maxRounds'] as int,
-        currentRound: response['currentRound'] as int,
-        half: response['half'] as int == 1 ? true : false,
-        players: players,
-        // players: [],
-        // id: response['_id'] as String,
-        // players: response['players'] as String?,
-        // createdAt: DateTime.parse(response['createdAt'] as String),
-      );
+      // final room = Room(
+      //   // id: response['id'] as String,
+      //   id: response['_id'] as String,
+      //   name: response['name'] as String,
+      //   maxRounds: response['maxRounds'] as int,
+      //   currentRound: response['currentRound'] as int,
+      //   half: response['half'] as int == 1 ? true : false,
+      //   players: players,
+      //   // players: [],
+      //   // id: response['_id'] as String,
+      //   // players: response['players'] as String?,
+      //   // createdAt: DateTime.parse(response['createdAt'] as String),
+      // );
 
       //  Inform our view model about the event
-      vm.createRoomSuccess(room);
+      // vm.joinRoomSuccess(room);
     });
   }
 }

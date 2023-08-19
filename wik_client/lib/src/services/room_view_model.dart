@@ -35,6 +35,11 @@ class RoomViewModel extends ChangeNotifier {
     socketsService.createRoomSuccessListener(context);
   }
 
+  //  Subscribe to the "joinRoomSuccess" listener
+  void subscribeToJoinRoomSuccess(BuildContext context) {
+    socketsService.joinRoomSuccessListener(context);
+  }
+
   /// EVENT HANDLERS
 
   //  Handles our "onTestSuccess" event from Sockets Service
@@ -47,9 +52,19 @@ class RoomViewModel extends ChangeNotifier {
   }
 
   //  Handles our "createRoomSuccess" event from Sockets Service
-  void createRoomSuccess(Room newRoom) {
+  void joinRoomSuccess(Room newRoom) {
     //  Set our room
-    room = newRoom;
+    // room = newRoom;
+
+    //  Notify all listeners
+    notifyListeners();
+  }
+
+  //  Handles our "createRoomSuccess" event from Sockets Service
+  //  TODO fix this
+  void createRoomSuccess() {
+    //  Set our room
+    // room = newRoom;
 
     //  Notify all listeners
     notifyListeners();
@@ -58,8 +73,14 @@ class RoomViewModel extends ChangeNotifier {
   /// EVENTS
 
   //  Sends a "createRoom" event to the server
-  void createRoom(String roomName, String nickname, int maxRounds) {
+  void createRoom(String roomName, int maxRounds) {
     //  Tell our sockets service we want to create a room
-    socketsService.createRoom(roomName, nickname, maxRounds);
+    socketsService.createRoom(roomName, maxRounds);
+  }
+
+  //  Sends a "joinRoom" event to the server
+  void joinRoom(String roomId, String nickname) {
+    //  Tell our sockets service we want to join a room
+    socketsService.joinRoom(roomId, nickname);
   }
 }
