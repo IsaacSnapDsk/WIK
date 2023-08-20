@@ -59,6 +59,11 @@ class RoomViewModel extends ChangeNotifier implements SocketsSubscriber {
     socketsService.createRoomSuccessListener(context);
   }
 
+  //  Subscribe to the "gameMasterCreatedSuccess" listener
+  void subscribeToGameMasterCreatedSuccess(BuildContext context) {
+    socketsService.gameMasterCreatedSuccess(context);
+  }
+
   //  Subscribe to the "joinRoomSuccess" listener
   void subscribeToJoinRoomSuccess(BuildContext context) {
     socketsService.joinRoomSuccessListener(context);

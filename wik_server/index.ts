@@ -157,10 +157,8 @@ io.on("connection", (socket) => {
             socket.join(roomId);
             // io -> send data to everyone
             // socket -> sending data to yourself
-            io.to(roomId).emit("createRoomSuccess", {
-                room: savedRoom,
-                gameMaster: gameMaster,
-            });
+            io.to(roomId).emit("createRoomSuccess", savedRoom);
+            socket.emit('gameMasterCreatedSuccess', gameMaster)
         } catch (e) {
             console.log(e);
         }

@@ -96,10 +96,18 @@ class SocketsService {
   void createRoomSuccessListener(BuildContext context) {
     _client.on('createRoomSuccess', (response) {
       //  Create our room
-      _room = Room.fromJson(response['room']);
+      _room = Room.fromJson(response);
 
-      //  Create our game master
-      _gameMaster = GameMaster.fromJson(response['gameMaster']);
+      //  Tell our subscribers to refresh
+      notifySubscribers();
+    });
+  }
+
+  /// Listenes to the "gameMasterCreatedSuccess" event
+  void gameMasterCreatedSuccess(BuildContext context) {
+    _client.on('gameMasterCreatedSuccess', (response) {
+      //  Convert our response into a game master
+      _gameMaster = GameMaster.fromJson(response);
 
       //  Tell our subscribers to refresh
       notifySubscribers();

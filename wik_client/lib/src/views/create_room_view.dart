@@ -35,6 +35,9 @@ class _CreateRoomViewState extends ConsumerState<CreateRoomView> {
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       //  Get our view model
       vm = ref.watch(roomViewModel);
+
+      //  Listen to our game master creation
+      vm.subscribeToGameMasterCreatedSuccess(context);
     });
   }
 
