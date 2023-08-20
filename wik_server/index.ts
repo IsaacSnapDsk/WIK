@@ -16,6 +16,7 @@ const port = process.env.PORT || 3000;
 const server = http.createServer();
 const { gameMasterModel } = require("./src/models/game_master")
 const { roomModel } = require("./src/models/room");
+const { roundModel } = require("./src/models/round");
 const { playerModel } = require("./src/models/player");
 var io = require("socket.io")(server);
 
@@ -118,6 +119,8 @@ io.on("connection", (socket) => {
             const room = new roomModel({
                 name: roomName,
                 maxRounds: maxRounds,
+                currentRound: 0,
+                half: false,
                 rounds: []
             });
 
@@ -135,10 +138,11 @@ io.on("connection", (socket) => {
             room.gameMaster = gameMaster
 
             //  Create our first round
-            const round = {
+            const round = new roundModel({
                 no: 1,
+                turn: 'Voting',
                 votes: []
-            }
+            })
 
             //  Set our first round in the room
             room.rounds.push(round)
@@ -152,14 +156,14 @@ io.on("connection", (socket) => {
             // socket -> sending data to yourself
             io.to(roomId).emit("createRoomSuccess", {
                 room: savedRoom,
-                secret: gameMaster.secret,
+                gameMaster: gameMaster,
             });
         } catch (e) {
             console.log(e);
         }
     });
 
-    socket.on("joinRoom", async ({ roomId, name }) => {
+    socket.on("joinRoom", async ({ roomId, nickname }) => {
         try {
             //  Find our room
             const room = await roomModel.findById(roomId)
@@ -170,7 +174,7 @@ io.on("connection", (socket) => {
             //  Else, we found our room so lets create a player to connect to it
             const player = new playerModel({
                 socketId: socket.id,
-                name: name
+                name: nickname
             })
 
             //  Add our player to the room
@@ -186,7 +190,7 @@ io.on("connection", (socket) => {
             //  Notify about joining
             io.to(roomId).emit("joinRoomSuccess", savedRoom)
         } catch (e) {
-            console.log('nahhaha')
+            console.log('nahhaha', e)
         }
     });
 
