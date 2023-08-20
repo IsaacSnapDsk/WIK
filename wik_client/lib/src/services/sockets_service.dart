@@ -125,6 +125,17 @@ class SocketsService {
     });
   }
 
+  /// Listens to our "playerCreatedSuccess" event
+  void playerCreatedSuccessListener(BuildContext context) {
+    _client.on('playerCreatedSuccess', (response) {
+      //  Convert our player into a player
+      _player = Player.fromJson(response);
+
+      //  Tell our subscribers to refresh
+      notifySubscribers();
+    });
+  }
+
   /// Listens to the "startGameSuccess" event
   void startGameSuccessListener(BuildContext context) {
     _client.on("startGameSuccess", (response) {

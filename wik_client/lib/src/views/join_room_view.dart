@@ -34,6 +34,9 @@ class _JoinRoomViewState extends ConsumerState<JoinRoomView> {
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       //  Get our view model
       vm = ref.watch(roomViewModel);
+
+      //  Subscribe to our player creation
+      vm.subscribeToPlayerCreatedSuccess(context);
     });
   }
 

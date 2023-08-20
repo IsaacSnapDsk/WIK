@@ -177,6 +177,7 @@ io.on("connection", (socket) => {
                 socketId: socket.id,
                 name: nickname
             })
+            player.save()
 
             //  Add our player to the room
             room.players.push(player)
@@ -190,6 +191,9 @@ io.on("connection", (socket) => {
 
             //  Notify about joining
             io.to(roomId).emit("joinRoomSuccess", savedRoom)
+
+            //  Notify about the new player
+            socket.emit("playerCreatedSuccess", player)
         } catch (e) {
             console.log('nahhaha', e)
         }
@@ -265,7 +269,7 @@ io.on("connection", (socket) => {
             const savedRoom = await room.save()
 
             // Save our round
-            round.save()
+            // round.save()
 
             //  Save our player
             player.save()
