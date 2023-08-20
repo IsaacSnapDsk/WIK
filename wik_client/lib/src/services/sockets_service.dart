@@ -58,11 +58,11 @@ class SocketsService {
   }
 
   //  Sends a "joinRoom" event to our Server
-  void joinRoom(String roomId, String nickname) {
+  void joinRoom(String joinId, String nickname) {
     _client.emit(
       'joinRoom',
       {
-        'roomId': roomId,
+        'joinId': joinId,
         'nickname': nickname,
       },
     );

@@ -17,6 +17,7 @@ const server = http.createServer();
 const { gameMasterModel } = require("./src/models/game_master")
 const { roomModel } = require("./src/models/room");
 const { roundModel } = require("./src/models/round");
+const { scoreModel } = require("./src/models/score");
 const { playerModel } = require("./src/models/player");
 var io = require("socket.io")(server);
 
@@ -32,73 +33,92 @@ const url = process.env.MONGO_URL
 const DB = url.replace("<password>", password)
 
 //  Sets the turn from Waiting to Calculating
-const startCalculating = async (room): Promise<Object[]> => {
+const startCalculating = async (room): Promise<Room> => {
     //  Grab our current round
     const round = room.rounds[room.currentRound]
 
-    //  Grab the players from the current room
-    // const players = room.players.filter((x: Player) => x.vote)
+    //  Grab our bets
+    const bets = room.bets
 
-    //  Grab our votes
-    const votes = room.votes
+    //  Create our array of scores
+    const scores = []
 
-    //  Create our array of results
-    const results = []
+    //  Grab our round's win
+    const win = round.kill == true
 
     //  Iterate through each vote to compute results
-    for (let i = 0; i < votes.length; i++) {
-        //  Check if this player won
-        const win = votes[i].kill == room.kill
+    for (let i = 0; i < bets.length; i++) {
+        //  Grab the current bet
+        let curr = bets[i]
 
-        //  Grab the players current vote
-        const result = {
-            win: win,
-            playerId: votes[i].playerId,
-            wager: votes[i].wager,
-            amount: votes[i].amount
-        }
+        //  Find the player for this bet
+        let player = room.players.find(x => x.id === curr.playerId)
 
-        //  Add this to our array of results
-        results.push(result)
+        //  Create a score for this player based on the win
+        let score = new scoreModel({
+            playerId: curr.playerId,
+            win: win ? 1 : 0,
+            drinks: win ? 0 : curr.drinks,
+            shots: win ? 0 : curr.shots,
+            bb: win ? 0 : curr.bb,
+        })
+
+        //  add this score to our array
+        scores.push(score)
+
+        //  Add this score to this player's scores
+        player.scores.push(score)
     }
 
-    //  Return our results array
-    return results
+    //  Attach our scores to our round
+    round.scores = scores
+
+    //  Update the round for our room
+    room.rounds[room.currentRound] = round
+
+    //  SAae the changes
+    const savedRoom = room.save()
+
+    //  Return our saved room
+    return savedRoom
 }
 
 //  Sets the turn from Betting to Waiting
-const stopVoting = async (room): Promise<Room> => {
-    //  Grab our current round
-    const round = room.rounds[room.currentRound]
+// const stopVoting = async (room): Promise<Room> => {
+//     //  Grab our current round
+//     const round = room.rounds[room.currentRound]
 
-    //  Grab the players from our current room
-    const players = room.players.filter((x: Player) => x.bet)
+//     //  Grab the players from our current room
+//     const players = room.players.filter((x: Player) => x.bet)
 
-    //  Store everyone's vote
-    const votes = players.map((x: Player) => x.bet)
+//     //  Store everyone's vote
+//     const votes = players.map((x: Player) => x.bet)
 
-    //  Store the votes for the current round
-    round.votes = votes
+//     //  Store the votes for the current round
+//     round.votes = votes
 
-    //  Change the round's turn to "Betting"
-    round.turn = Turn.Betting
+//     //  Change the round's turn to "Betting"
+//     round.turn = Turn.Betting
 
-    //  Update this round in our room
-    room.rounds[room.currentRound] = round
+//     //  Update this round in our room
+//     room.rounds[room.currentRound] = round
 
-    //  TODO Save our round
-    room = await room.save()
+//     //  TODO Save our round
+//     room = await room.save()
 
-    //  TODO update our round's turn in the DB
-    //  TODO update our list of rounds in the DB
+//     //  TODO update our round's turn in the DB
+//     //  TODO update our list of rounds in the DB
 
-    return room
-}
+//     return room
+// }
 
 const generateSecret = (): String => {
     return crypto.randomBytes(64).toString('hex');
 }
 
+const generateJoinId = (): String => {
+    return Array.from(Array(6), () => Math.floor(Math.random() * 36).toString(36)).join('').toUpperCase();
+}
 
 /// SOCKET CONNECTION
 io.on("connection", (socket) => {
@@ -115,9 +135,13 @@ io.on("connection", (socket) => {
     console.log("connected!");
     socket.on("createRoom", async ({ roomName, maxRounds }) => {
         try {
+            //  Generate a random join id
+            const joinId = generateJoinId()
+
             // Create a new room
             const room = new roomModel({
                 name: roomName,
+                joinId: joinId,
                 maxRounds: maxRounds,
                 currentRound: 0,
                 half: false,
@@ -144,7 +168,8 @@ io.on("connection", (socket) => {
             const round = new roundModel({
                 no: 1,
                 turn: 'Betting',
-                votes: []
+                bets: [],
+                scores: [],
             })
 
             //  Set our first round in the room
@@ -164,13 +189,13 @@ io.on("connection", (socket) => {
         }
     });
 
-    socket.on("joinRoom", async ({ roomId, nickname }) => {
+    socket.on("joinRoom", async ({ joinId, nickname }) => {
         try {
             //  Find our room
-            const room = await roomModel.findById(roomId)
+            const room = await roomModel.findOne({ 'joinId': joinId })
 
             //  If it isn't found, return an error
-            if (!room) return socket.emit("errorOccurred", "Please enter a valid room ID.")
+            if (!room) return socket.emit("errorOccurred", "Please enter a valid join ID.")
 
             //  Else, we found our room so lets create a player to connect to it
             const player = new playerModel({
@@ -185,6 +210,9 @@ io.on("connection", (socket) => {
             //  Save our room
             const savedRoom = await room.save()
             console.log('saved room', savedRoom)
+
+            //  Grab our room's id
+            const roomId = room._id.toString()
 
             //  Subscribe to this room's connection
             socket.join(roomId)
@@ -281,29 +309,29 @@ io.on("connection", (socket) => {
         }
     })
 
-    socket.on("stopVoting", async ({ roomId }) => {
-        try {
-            //  TODO add validation that prevents changing under following circumstances:
+    // socket.on("stopVoting", async ({ roomId }) => {
+    //     try {
+    //         //  TODO add validation that prevents changing under following circumstances:
 
-            //  Grab our current room
-            const room = await roomModel.findById(roomId)
+    //         //  Grab our current room
+    //         const room = await roomModel.findById(roomId)
 
-            //  TODO make it so players cannot join in the middle
+    //         //  TODO make it so players cannot join in the middle
 
-            //  Set our next turn
-            const savedRoom = await stopVoting(room)
+    //         //  Set our next turn
+    //         const savedRoom = await stopVoting(room)
 
 
-            //  Grab the current round
-            const currentRound = savedRoom.rounds[savedRoom.currentRound]
+    //         //  Grab the current round
+    //         const currentRound = savedRoom.rounds[savedRoom.currentRound]
 
-            //  Return our new turn
-            io.to(roomId).emit("changeTurnSuccess", currentRound)
-        }
-        catch (e) {
-            console.log(`Error stopping voting ${e}`)
-        }
-    })
+    //         //  Return our new turn
+    //         io.to(roomId).emit("changeTurnSuccess", currentRound)
+    //     }
+    //     catch (e) {
+    //         console.log(`Error stopping voting ${e}`)
+    //     }
+    // })
 
     socket.on("startCalculating", async ({ roomId, kill }) => {
         try {
@@ -314,23 +342,29 @@ io.on("connection", (socket) => {
             room.kill = kill
 
             //  Start calculating
-            const results = await startCalculating(room)
+            const savedRoom = await startCalculating(room)
 
-            //  Save our round
-            room.rounds[room.currentRound].turn = Turn.Results
-            const savedRoom = await room.save()
-
-            //  Notify results
-            results.forEach(x => io.to(roomId).emit('resultCalculated', x))
-
-            //  Grab the current round
-            const currentRound = savedRoom.rounds[savedRoom.currentRound]
-
-            //  Return our new turn
-            io.to(roomId).emit("changeTurnSuccess", currentRound)
+            //  Return our saved room
+            io.to(roomId).emit("changeTurnSuccess", savedRoom)
         }
         catch (e) {
             console.log(`Error starting calculating ${e}`)
+        }
+    })
+
+    socket.on("countResults", async ({ roomId }) => {
+        try {
+            //  Grab our current room
+            const room = await roomModel.findById(roomId)
+
+            //  We should notify every player about their updated score
+            io.to(roomId).emit("countReusltsSuccess", room)
+
+            //  Notify the game master as well
+            socket.emit('scoresCountedSuccess', room)
+        }
+        catch (e) {
+            console.log(`Error counting results ${e}`)
         }
     })
 

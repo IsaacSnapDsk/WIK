@@ -93,9 +93,9 @@ class RoomViewModel extends ChangeNotifier implements SocketsSubscriber {
   }
 
   //  Sends a "joinRoom" event to the server
-  void joinRoom(String roomId, String nickname) {
+  void joinRoom(String joinId, String nickname) {
     //  Tell our sockets service we want to join a room
-    socketsService.joinRoom(roomId, nickname);
+    socketsService.joinRoom(joinId, nickname);
   }
 
   // Sends a "bet" event to the server

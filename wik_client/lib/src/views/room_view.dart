@@ -51,12 +51,13 @@ class _RoomViewState extends ConsumerState<RoomView> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.primary,
-        title: const Text("Waiting Room"),
+        title: Text("Waiting Room Joinable ID: ${_room.joinId}"),
       ),
       body: Center(
         child: Container(
           padding: const EdgeInsets.all(8.0),
           child: Column(children: [
+            Text("Here's the join ID: ${_room.joinId}"),
             Text("You are in room: ${_room.name}"),
             const Text("Current Players: "),
             for (final player in _room.players) Text(player.name),

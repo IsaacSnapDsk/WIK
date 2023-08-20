@@ -8,6 +8,7 @@ part of 'room.dart';
 
 Room _$RoomFromJson(Map<String, dynamic> json) => Room(
       id: json['_id'] as String,
+      joinId: json['joinId'] as String,
       name: json['name'] as String,
       maxRounds: json['maxRounds'] as int,
       currentRound: json['currentRound'] as int,
@@ -23,6 +24,7 @@ Room _$RoomFromJson(Map<String, dynamic> json) => Room(
 
 Map<String, dynamic> _$RoomToJson(Room instance) => <String, dynamic>{
       'id': instance.id,
+      'joinId': instance.joinId,
       'name': instance.name,
       'maxRounds': instance.maxRounds,
       'currentRound': instance.currentRound,

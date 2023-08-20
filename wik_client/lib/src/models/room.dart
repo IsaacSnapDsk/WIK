@@ -16,6 +16,7 @@ part 'room.g.dart';
 class Room {
   Room({
     required this.id,
+    required this.joinId,
     required this.name,
     required this.maxRounds,
     required this.currentRound,
@@ -27,6 +28,9 @@ class Room {
 
   /// Unique identifier for our room
   final String id;
+
+  /// Unique identifier for our room for joining
+  final String joinId;
 
   /// The name our room is displayed as
   final String name;

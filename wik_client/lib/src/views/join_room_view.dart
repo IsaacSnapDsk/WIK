@@ -13,7 +13,7 @@ class JoinRoomView extends ConsumerStatefulWidget {
 
 class _JoinRoomViewState extends ConsumerState<JoinRoomView> {
   /// The id we want to use for joining our room
-  String? _roomId;
+  String? _joinId;
 
   /// The nickname for our player
   String? _nickname;
@@ -79,7 +79,7 @@ class _JoinRoomViewState extends ConsumerState<JoinRoomView> {
                 ),
                 child: const Text("Join Room"),
                 onPressed: () =>
-                    _canSubmit ? vm.joinRoom(_roomId!, _nickname!) : null,
+                    _canSubmit ? vm.joinRoom(_joinId!, _nickname!) : null,
               ),
             ],
           ),
@@ -91,7 +91,7 @@ class _JoinRoomViewState extends ConsumerState<JoinRoomView> {
   void _calcCanSubmit() {
     setState(() {
       //  If ANY of our values are null, this is false
-      final canSubmit = _nickname != null && _roomId != null;
+      final canSubmit = _nickname != null && _joinId != null;
 
       //  Set our value to whether we are falsey or not
       _canSubmit = canSubmit;
@@ -108,7 +108,7 @@ class _JoinRoomViewState extends ConsumerState<JoinRoomView> {
 
   void _onRoomIdChanged(String val) {
     //  Update our room name value
-    _roomId = val;
+    _joinId = val;
 
     //  Check if we can submit or not
     _calcCanSubmit();

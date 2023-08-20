@@ -21,6 +21,10 @@ const roomSchema = new mongoose.Schema({
         type: String,
         default: null
     },
+    joinId: {
+        type: String,
+        required: true,
+    },
     maxRounds: {
         type: Number,
         default: 6,
