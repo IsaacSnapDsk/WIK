@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:wik_client/src/services/room_view_model.dart';
-import 'package:wik_client/src/services/sockets_service.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:wik_client/src/views/create_room_view.dart';
 import 'package:wik_client/src/views/join_room_view.dart';
+import 'package:wik_client/src/views/betting.dart';
 
 Future main() async {
   // Load our .env file
@@ -81,7 +81,7 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
                   context,
                   MaterialPageRoute(
                     builder: (_) {
-                      return const CreateRoomView();
+                      return const BettingView();
                     },
                   ),
                 ),
