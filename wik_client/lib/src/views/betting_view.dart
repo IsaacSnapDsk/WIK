@@ -1,7 +1,13 @@
+import 'dart:ffi';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:wik_client/src/services/room_view_model.dart';
+import 'package:wik_client/src/models/room.dart';
+import 'package:wik_client/src/models/player.dart';
+import 'package:wik_client/src/models/bet.dart';
+import 'package:wik_client/src/views/waiting_view.dart';
 
 const List<String> wagers = <String>['Dranks', 'BeeBee', 'SHOTS'];
 
@@ -24,6 +30,12 @@ class _BettingViewState extends ConsumerState<BettingView> {
 
   /// Determines if we can submit the form or not
   bool _canSubmit = false;
+
+  /// Local room instance
+  late Room _room;
+
+  /// Local player instance
+  late Player _player;
 
   // @override
   // void initState() {
@@ -67,8 +79,34 @@ class _BettingViewState extends ConsumerState<BettingView> {
     _calcCanSubmit();
   }
 
+  void _onSubmitBet() {
+    //  Create our bet
+    final bet = _createBet();
+
+    //  Get our view model
+    final vm = ref.watch(roomViewModel);
+
+    //  Submit our bet
+    vm.submitBet(_room.id, bet);
+  }
+
+  Bet _createBet() {
+    return Bet(
+      playerId: _player.id,
+      kill: _kill!,
+      type: _wager,
+      amount: _amount!,
+    );
+  }
+
   Widget _buildBet() {
-    if (_kill == null) {
+    _room = ref.watch(roomViewModel).room!;
+    _player = ref.watch(roomViewModel).player!;
+    Bet currentBet = _room.rounds[_room.currentRound].bets
+        .firstWhere((bet) => bet.playerId == _player.id);
+    if (currentBet != -1) {
+      return WaitingView(currentBet: currentBet);
+    } else if (_kill == null) {
       return Column(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
@@ -130,6 +168,7 @@ class _BettingViewState extends ConsumerState<BettingView> {
                     _wager = "SHOTS";
                     _amount = 2;
                     print('kill: $_kill, wager: $_wager, amount: $_amount');
+                    _onSubmitBet();
                   });
                   // Navigator.push(
                   //   context,
@@ -185,9 +224,14 @@ class _BettingViewState extends ConsumerState<BettingView> {
               ),
             ),
             child: const Text("Submit Bet"),
-            onPressed: () => _canSubmit
-                ? print('kill: $_kill, wager: $_wager, amount: $_amount')
-                : null,
+            onPressed: () {
+              if (_canSubmit) {
+                print('kill: $_kill, wager: $_wager, amount: $_amount');
+                _onSubmitBet();
+              } else {
+                null;
+              }
+            },
           ),
         ],
       );

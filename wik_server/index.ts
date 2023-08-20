@@ -267,13 +267,13 @@ io.on("connection", (socket) => {
             const savedRoom = await room.save()
 
             // Save our round
-            const savedRound = await round.save()
+            round.save()
 
             //  Save our player
-            const savedPlayer = await player.save()
+            player.save()
 
             //  Inform client about bet
-            io.to(roomId).emit("betSuccess", round)
+            io.to(roomId).emit("betSuccess", savedRoom)
         } catch (e) {
             console.log(`Error posting bet ${e}`)
         }

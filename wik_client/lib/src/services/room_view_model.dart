@@ -84,7 +84,7 @@ class RoomViewModel extends ChangeNotifier implements SocketsSubscriber {
   }
 
   // Sends a "bet" event to the server
-  void bet(String roomId, Bet bet) {
+  void submitBet(String roomId, Bet bet) {
     //  Tell our sockets service we want to bet
     socketsService.bet(roomId, bet);
   }
