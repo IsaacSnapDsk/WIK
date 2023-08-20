@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:wik_client/src/services/room_view_model.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:wik_client/src/models/room.dart';
+import 'package:wik_client/src/services/room_view_model.dart';
 import 'package:wik_client/src/views/create_room_view.dart';
 import 'package:wik_client/src/views/join_room_view.dart';
-import 'package:wik_client/src/views/betting.dart';
+import 'package:wik_client/src/views/room_view.dart';
 
 Future main() async {
   // Load our .env file
@@ -48,21 +49,64 @@ class MyHomePage extends ConsumerStatefulWidget {
 }
 
 class _MyHomePageState extends ConsumerState<MyHomePage> {
+  ///  Keeps track of our current room
+  late Room? _room;
+
   @override
   void initState() {
     super.initState();
+  }
 
-    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-      //  Get our view model
-      final vm = ref.watch(roomViewModel);
-
-      vm.subscribeToTestSuccess(context);
-      vm.subscribeToCreateRoomSuccess(context);
-    });
+  /// Returns a join room button if we already have a room, else provides options
+  Widget _buildHomeButtons() {
+    //  If we have a room, just return a simple button to take us to our room view
+    if (_room != null) {
+      return ElevatedButton(
+        child: const Text("Return to Room"),
+        onPressed: () => Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) {
+              return const RoomView();
+            },
+          ),
+        ),
+      );
+    } else {
+      return Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          ElevatedButton(
+            child: const Text("Create a Room"),
+            onPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) {
+                  return const CreateRoomView();
+                },
+              ),
+            ),
+          ),
+          ElevatedButton(
+            child: const Text("Join a Room"),
+            onPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) {
+                  return const JoinRoomView();
+                },
+              ),
+            ),
+          ),
+        ],
+      );
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    _room = ref.watch(roomViewModel).room;
+
     //  Our actual layout
     return Scaffold(
       appBar: AppBar(
@@ -72,33 +116,7 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
       body: Center(
         child: Padding(
           padding: const EdgeInsets.all(8.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              ElevatedButton(
-                child: const Text("Create a Room"),
-                onPressed: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) {
-                      return const BettingView();
-                    },
-                  ),
-                ),
-              ),
-              ElevatedButton(
-                child: const Text("Join a Room"),
-                onPressed: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) {
-                      return const JoinRoomView();
-                    },
-                  ),
-                ),
-              ),
-            ],
-          ),
+          child: _buildHomeButtons(),
         ),
       ),
     );
