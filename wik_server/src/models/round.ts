@@ -11,7 +11,7 @@ export interface Round {
 }
 
 export enum Turn {
-    Voting = 'Voting',
+    Betting = 'Betting',
     Waiting = 'Waiting',
     Results = 'Results',
     Final = 'Final'
@@ -29,7 +29,7 @@ const roundSchema = new mongoose.Schema({
     turn: {
         required: true,
         type: String,
-        default: 'Voting',
+        default: 'Betting',
     },
     half: {
         required: true,

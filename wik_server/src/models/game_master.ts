@@ -1,14 +1,9 @@
-import { Vote } from "./bet";
-
 const mongoose = require("mongoose");
 
 export interface GameMaster {
-    name: string
-    wins: number
-    drinks: number
-    shots: number
-    bbs: number
-    vote?: Vote
+    roomId: string
+    socketId: string
+    secret: string
 }
 
 const gameMasterSchema = new mongoose.Schema({

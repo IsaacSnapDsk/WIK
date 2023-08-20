@@ -66,7 +66,7 @@ const startCalculating = async (room): Promise<Object[]> => {
     return results
 }
 
-//  Sets the turn from Voting to Waiting
+//  Sets the turn from Betting to Waiting
 const stopVoting = async (room): Promise<Room> => {
     //  Grab our current round
     const round = room.rounds[room.currentRound]
@@ -80,8 +80,8 @@ const stopVoting = async (room): Promise<Room> => {
     //  Store the votes for the current round
     round.votes = votes
 
-    //  Change the round's turn to "Voting"
-    round.turn = Turn.Voting
+    //  Change the round's turn to "Betting"
+    round.turn = Turn.Betting
 
     //  Update this round in our room
     room.rounds[room.currentRound] = round
@@ -140,7 +140,7 @@ io.on("connection", (socket) => {
             //  Create our first round
             const round = new roundModel({
                 no: 1,
-                turn: 'Voting',
+                turn: 'Betting',
                 votes: []
             })
 
