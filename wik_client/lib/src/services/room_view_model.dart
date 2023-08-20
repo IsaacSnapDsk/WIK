@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:wik_client/src/models/game_master.dart';
+import 'package:wik_client/src/models/player.dart';
 import 'package:wik_client/src/models/room.dart';
 import 'package:wik_client/src/services/sockets_service.dart';
+import 'package:wik_client/src/services/sockets_subscriber.dart';
 
 final roomViewModel = ChangeNotifierProvider((ref) {
   return RoomViewModel(
@@ -9,26 +12,46 @@ final roomViewModel = ChangeNotifierProvider((ref) {
   );
 });
 
-class RoomViewModel extends ChangeNotifier {
+class RoomViewModel extends ChangeNotifier implements SocketsSubscriber {
   RoomViewModel({
     required this.socketsService,
   }) {
+    //  Subscribe to our sockets service
+    socketsService.subscribe(this);
+
+    //  Refresh all of our data
+    refresh();
+
     return;
   }
 
+  /// Our services
   final SocketsService socketsService;
 
-  String test = "Waiting";
-
-  //  Keeps track of our current room
+  /// Keeps track of our current room
   Room? room;
 
-  /// LISTENERS
+  /// Keeps track of our current player
+  Player? player;
 
-  //  Subscribe to our "testSuccess" listener
-  void subscribeToTestSuccess(BuildContext context) {
-    socketsService.testSuccessListener(context);
+  /// Keeps track of our current game master
+  GameMaster? gameMaster;
+
+  /// Initialize the state
+  void init() => refresh();
+
+  @override
+  void refresh() {
+    //  Get our data from our sockets service
+    room = socketsService.room;
+    player = socketsService.player;
+    gameMaster = socketsService.gameMaster;
+
+    //  Notify all listeners
+    notifyListeners();
   }
+
+  /// LISTENERS
 
   //  Subscribe to our "createRoomSuccess" listener
   void subscribeToCreateRoomSuccess(BuildContext context) {
@@ -38,36 +61,6 @@ class RoomViewModel extends ChangeNotifier {
   //  Subscribe to the "joinRoomSuccess" listener
   void subscribeToJoinRoomSuccess(BuildContext context) {
     socketsService.joinRoomSuccessListener(context);
-  }
-
-  /// EVENT HANDLERS
-
-  //  Handles our "onTestSuccess" event from Sockets Service
-  void onTestSuccess(String message) {
-    //  Set our test value
-    test = message;
-
-    //  Notify listeners about this
-    notifyListeners();
-  }
-
-  //  Handles our "createRoomSuccess" event from Sockets Service
-  void joinRoomSuccess(Room newRoom) {
-    //  Set our room
-    // room = newRoom;
-
-    //  Notify all listeners
-    notifyListeners();
-  }
-
-  //  Handles our "createRoomSuccess" event from Sockets Service
-  //  TODO fix this
-  void createRoomSuccess() {
-    //  Set our room
-    // room = newRoom;
-
-    //  Notify all listeners
-    notifyListeners();
   }
 
   /// EVENTS
