@@ -1,13 +1,13 @@
 const mongoose = require("mongoose");
-const voteSchema = require("./vote");
-import { Vote } from "./vote"
+const betSchema = require("./bet");
+import { Bet } from "./bet"
 
 export interface Round {
     no: number
     kill: boolean
     turn: Turn
     half: boolean
-    votes: Vote[]
+    bets: Bet[]
 }
 
 export enum Turn {
@@ -36,7 +36,7 @@ const roundSchema = new mongoose.Schema({
         type: Boolean,
         default: false
     },
-    // votes: [voteSchema]
+    bets: [betSchema]
 });
 
 const roundModel = mongoose.model("Round", roundSchema);

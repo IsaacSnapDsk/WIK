@@ -1,4 +1,4 @@
-import { Vote } from "./vote";
+import { Vote } from "./bet";
 
 const mongoose = require("mongoose");
 

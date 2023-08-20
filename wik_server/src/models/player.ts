@@ -1,14 +1,15 @@
-import { Vote } from "./vote";
+import { Bet } from "./bet";
 
 const mongoose = require("mongoose");
 
 export interface Player {
+    _id: string
     name: string
     wins: number
     drinks: number
     shots: number
     bbs: number
-    vote?: Vote
+    bet: Bet
 }
 
 const playerSchema = new mongoose.Schema({
@@ -35,9 +36,9 @@ const playerSchema = new mongoose.Schema({
         type: Number,
         default: 0,
     },
-    vote: {
-        type: Object,
-        default: null,
+    bets: {
+        type: Array,
+        default: [],
     },
 });
 
