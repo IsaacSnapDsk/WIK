@@ -68,10 +68,10 @@ class SocketsService {
     );
   }
 
-  //  Sends a "bet" event to our Server
+  //  Sends a "betSuccess" event to our Server
   void bet(String roomId, Bet bet) {
     _client.emit(
-      'bet',
+      'betSuccess',
       {
         'roomId': roomId,
         'bet': bet,
