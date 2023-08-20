@@ -4,7 +4,7 @@ const crypto = require('crypto')
 import { Player } from "./src/models/player";
 import { Room } from "./src/models/room";
 import { Turn } from "./src/models/round";
-import { Vote } from "./src/models/vote";
+import { Bet } from "./src/models/bet";
 
 // importing modules
 const http = require("http");
@@ -190,38 +190,47 @@ io.on("connection", (socket) => {
         }
     });
 
-    socket.on("postVote", async ({ roomId, vote }) => {
+    socket.on("bet", async ({ roomId, bet }) => {
         try {
             //  Grab our current room
             const room = await roomModel.findById(roomId)
 
-            //  Find the player matching this vote id
-            const player = await playerModel.findById(vote.playerId)
+            //  If it isn't found, return an error
+            if (!room) return socket.emit("errorOccurred", "Room not found.")
+
+            //  Find the player matching this bet id
+            const player = await playerModel.findById(bet.playerId)
+
+            //  If it isn't found, return an error
+            if (!player) return socket.emit("errorOccurred", "Player does not exist.")
 
             //  Grab our current round
             const round = room.rounds[room.currentRound]
 
-            //  Find the index of the vote for this player
-            const idx = round.votes.findIndex((x: Vote) => x.playerId = player._id)
+            //  Update the player's bets
+            player.bets.push(bet)
 
-            //  If we found the index then update the vote
-            if (idx !== -1) round.votes[idx] = vote
-            else round.push(vote)
+            //  Adds the player's bet to the round
+            round.bets.push(bet)
+
+            //  Find the index of the vote for this player
+            const playerIdx = room.players.findIndex((x: Player) => x._id === player._id)
 
             //  Update our room
             room.rounds[room.currentRound] = round
-            const savedRoom = room.save()
+            room.players[playerIdx] = player
+            const savedRoom = await room.save()
 
-            //  Update the player's vote
-            player.vote = vote
+            // Save our round
+            const savedRound = await round.save()
 
             //  Save our player
             const savedPlayer = await player.save()
 
-            //  Inform client about vote
-            io.to(roomId).emit("votePostSuccess", round)
+            //  Inform client about bet
+            io.to(roomId).emit("betSuccess", round)
         } catch (e) {
-            console.log(`Error posting vote ${e}`)
+            console.log(`Error posting bet ${e}`)
         }
     })
 
