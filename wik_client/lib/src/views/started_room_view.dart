@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:wik_client/src/models/game_master.dart';
 import 'package:wik_client/src/models/room.dart';
 import 'package:wik_client/src/services/room_view_model.dart';
 import 'package:wik_client/src/views/betting_view.dart';
@@ -12,6 +13,7 @@ class StartedRoomView extends ConsumerStatefulWidget {
 }
 
 class _StartedRoomViewState extends ConsumerState<StartedRoomView> {
+  late GameMaster? _gameMaster;
   late Room _room;
 
   /// Our view model
@@ -46,6 +48,12 @@ class _StartedRoomViewState extends ConsumerState<StartedRoomView> {
   Widget build(BuildContext context) {
     //  Grab our room
     _room = ref.watch(roomViewModel).room!;
+
+    //  Check if we are the game master or not
+    _gameMaster = ref.watch(roomViewModel).gameMaster;
+
+    //  If our game master is null then return our placeholder
+    if (_gameMaster != null) return _buildPlaceholder();
 
     //  Grab our current round
     final currentRound = _room.rounds[_room.currentRound];
