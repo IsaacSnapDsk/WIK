@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:wik_client/src/models/game_master.dart';
 import 'package:wik_client/src/models/room.dart';
 import 'package:wik_client/src/services/room_view_model.dart';
 import 'package:wik_client/src/views/started_room_view.dart';
@@ -13,6 +14,8 @@ class RoomView extends ConsumerStatefulWidget {
 
 class _RoomViewState extends ConsumerState<RoomView> {
   late Room _room;
+
+  late GameMaster? _gm;
 
   /// Our view model
   late RoomViewModel vm;
@@ -35,6 +38,9 @@ class _RoomViewState extends ConsumerState<RoomView> {
     //  Listen to our room for changes
     _room = ref.watch(roomViewModel).room!;
 
+    //  Listen to our gm for changes
+    _gm = ref.watch(roomViewModel).gameMaster;
+
     //  Check if we our game started
     final started = _room.started;
 
@@ -54,10 +60,11 @@ class _RoomViewState extends ConsumerState<RoomView> {
             Text("You are in room: ${_room.name}"),
             const Text("Current Players: "),
             for (final player in _room.players) Text(player.name),
-            ElevatedButton(
-              onPressed: () {},
-              child: const Text("Start Game"),
-            ),
+            if (_gm != null)
+              ElevatedButton(
+                onPressed: () => vm.startGame(_room.id, _gm!.id),
+                child: const Text("Start Game"),
+              ),
           ]),
         ),
       ),

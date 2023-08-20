@@ -90,7 +90,7 @@ class RoomViewModel extends ChangeNotifier implements SocketsSubscriber {
   }
 
   //  Sends a "startGame" event to the server
-  void startGame(String roomId, String secret) {
-    socketsService.startGame(roomId, secret);
+  void startGame(String roomId, String gmId) {
+    socketsService.startGame(roomId, gmId);
   }
 }

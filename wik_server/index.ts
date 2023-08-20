@@ -134,6 +134,9 @@ io.on("connection", (socket) => {
                 secret: generateSecret()
             })
 
+            //  Save our game master
+            await gameMaster.save()
+
             //  Add our game master to the room
             room.gameMaster = gameMaster
 
@@ -193,6 +196,44 @@ io.on("connection", (socket) => {
             console.log('nahhaha', e)
         }
     });
+
+    socket.on("startGame", async ({ roomId, gmId }) => {
+        try {
+            console.log('starting game', roomId, gmId)
+            //  Grab our current room
+            const room = await roomModel.findById(roomId)
+            console.log('room', room)
+
+            //  If it isn't found, return an error
+            if (!room) return socket.emit("errorOccurred", "Room not found.")
+
+            //  Find our game master with this secret
+            const gameMaster = await gameMasterModel.findById(gmId)
+            console.log('game master', gameMaster)
+
+            //  If it isn't found, return an error
+            if (!gameMaster) return socket.emit("errorOccurred", "Game Master not found")
+
+            //  Check if this game master belongs to this room
+            const belongs = gameMaster.roomId === roomId
+            console.log('belongs', belongs)
+
+            //  If they dont, return an error
+            if (!belongs) return socket.emit("errorOccurred", "Game Master and Room do not match")
+
+            //  Else, set the room to be started
+            room.started = true
+
+            //  Save our changes
+            const savedRoom = await room.save()
+
+            //  Notify client
+            io.to(roomId).emit("startGameSuccess", savedRoom)
+        }
+        catch (e) {
+            console.log("error bitch", e)
+        }
+    })
 
     socket.on("bet", async ({ roomId, bet }) => {
         try {

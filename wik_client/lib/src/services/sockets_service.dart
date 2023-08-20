@@ -80,12 +80,12 @@ class SocketsService {
   }
 
   /// Sends a "startGame" event to our Server
-  void startGame(String roomId, String secret) {
+  void startGame(String roomId, String gmId) {
     _client.emit(
       'startGame',
       {
         'roomId': roomId,
-        'secret': secret,
+        'gmId': gmId,
       },
     );
   }
