@@ -34,12 +34,11 @@ class _JoinRoomViewState extends ConsumerState<JoinRoomView> {
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       //  Get our view model
       vm = ref.watch(roomViewModel);
-
-      vm.subscribeToJoinRoomSuccess(context);
     });
   }
 
   Widget _buildInitialState() {
+    print("hi");
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.primary,

@@ -49,12 +49,23 @@ class MyHomePage extends ConsumerStatefulWidget {
 }
 
 class _MyHomePageState extends ConsumerState<MyHomePage> {
+  /// Our view model
+  late RoomViewModel vm;
+
   ///  Keeps track of our current room
   late Room? _room;
 
   @override
   void initState() {
     super.initState();
+
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      //  Get our view model
+      vm = ref.watch(roomViewModel);
+
+      vm.subscribeToJoinRoomSuccess(context);
+      vm.subscribeToCreateRoomSuccess(context);
+    });
   }
 
   /// Returns a join room button if we already have a room, else provides options
