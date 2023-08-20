@@ -237,7 +237,7 @@ io.on("connection", (socket) => {
         }
     })
 
-    socket.on("bet", async ({ roomId, bet }) => {
+    socket.on("betSuccess", async ({ roomId, bet }) => {
         try {
             //  Grab our current room
             const room = await roomModel.findById(roomId)

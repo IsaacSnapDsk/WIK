@@ -26,6 +26,7 @@ class _StartedRoomViewState extends ConsumerState<StartedRoomView> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       //  Get our view model
       vm = ref.watch(roomViewModel);
+      vm.subscribeToBetSuccess(context);
     });
   }
 

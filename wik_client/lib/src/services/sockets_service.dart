@@ -147,7 +147,7 @@ class SocketsService {
     });
   }
 
-  /// Listens to the "joinRoomSuccess" event
+  /// Listens to the "betSuccess" event
   void betSuccessListener(BuildContext context) {
     _client.on('betSuccess', (response) {
       //  Convert our players into players
