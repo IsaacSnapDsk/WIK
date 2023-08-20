@@ -1,5 +1,6 @@
 import 'package:json_annotation/json_annotation.dart';
 import 'package:wik_client/src/models/bet.dart';
+import 'package:wik_client/src/models/score.dart';
 
 //  This is required to generate the JSON conversions
 part 'player.g.dart';
@@ -23,6 +24,7 @@ class Player {
     required this.shots,
     required this.bb,
     required this.bets,
+    required this.scores,
   });
 
   /// Unique identifier for our player
@@ -48,6 +50,9 @@ class Player {
 
   /// A list of a player's bets
   final List<Bet> bets;
+
+  /// A list of a player's scores
+  final List<Score> scores;
 
   /// Connect the generated [_$PlayerFromJson] function to the `fromJson`
   /// factory.

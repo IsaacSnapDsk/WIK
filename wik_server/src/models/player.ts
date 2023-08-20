@@ -1,4 +1,5 @@
 import { Bet } from "./bet";
+import { Score } from "./score";
 
 const mongoose = require("mongoose");
 
@@ -9,7 +10,8 @@ export interface Player {
     drinks: number
     shots: number
     bbs: number
-    bet: Bet
+    bets: Bet[],
+    scores: Score[]
 }
 
 const playerSchema = new mongoose.Schema({
@@ -40,6 +42,10 @@ const playerSchema = new mongoose.Schema({
         type: Array,
         default: [],
     },
+    scores: {
+        type: Array,
+        default: []
+    }
 });
 
 const playerModel = mongoose.model("Player", playerSchema);
