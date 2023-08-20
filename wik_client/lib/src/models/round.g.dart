@@ -9,7 +9,7 @@ part of 'round.dart';
 Round _$RoundFromJson(Map<String, dynamic> json) => Round(
       id: json['_id'] as String,
       no: json['no'] as int,
-      kill: json['kill'] as bool,
+      kill: json['kill'] as bool?,
       turn: json['turn'] as String,
     );
 

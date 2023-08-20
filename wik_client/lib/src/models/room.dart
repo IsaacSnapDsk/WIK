@@ -44,4 +44,11 @@ class Room {
 
   /// An array of the rounds in our game
   final List<Round> rounds;
+
+  /// Connect the generated [_$RoomFromJson] function to the `fromJson`
+  /// factory.
+  factory Room.fromJson(Map<String, dynamic> json) => _$RoomFromJson(json);
+
+  /// Connect the generated [_$RoomToJson] function to the `toJson` method.
+  Map<String, dynamic> toJson() => _$RoomToJson(this);
 }

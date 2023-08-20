@@ -16,7 +16,7 @@ class Round {
   Round({
     required this.id,
     required this.no,
-    required this.kill,
+    this.kill,
     required this.turn,
     // this.vote,
   });
@@ -28,7 +28,7 @@ class Round {
   final int no;
 
   /// A bool value that determines if this round was a kill or not
-  final bool kill;
+  final bool? kill;
 
   /// An enum value representing what our current turn is
   String turn;

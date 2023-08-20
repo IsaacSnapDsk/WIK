@@ -7,7 +7,7 @@ part of 'room.dart';
 // **************************************************************************
 
 Room _$RoomFromJson(Map<String, dynamic> json) => Room(
-      id: json['id'] as String,
+      id: json['_id'] as String,
       name: json['name'] as String,
       maxRounds: json['maxRounds'] as int,
       currentRound: json['currentRound'] as int,

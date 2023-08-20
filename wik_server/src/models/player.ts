@@ -14,7 +14,7 @@ export interface Player {
 const playerSchema = new mongoose.Schema({
     name: {
         type: String,
-        trim: true,
+        required: true,
     },
     socketId: {
         type: String,
