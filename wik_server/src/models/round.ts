@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-const betSchema = require("./bet");
+const { betSchema } = require("./bet");
 import { Bet } from "./bet"
 
 export interface Round {
