@@ -72,10 +72,10 @@ const stopVoting = async (room): Promise<Room> => {
     const round = room.rounds[room.currentRound]
 
     //  Grab the players from our current room
-    const players = room.players.filter((x: Player) => x.vote)
+    const players = room.players.filter((x: Player) => x.bet)
 
     //  Store everyone's vote
-    const votes = players.map((x: Player) => x.vote)
+    const votes = players.map((x: Player) => x.bet)
 
     //  Store the votes for the current round
     round.votes = votes
