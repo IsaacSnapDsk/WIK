@@ -12,6 +12,7 @@ Room _$RoomFromJson(Map<String, dynamic> json) => Room(
       maxRounds: json['maxRounds'] as int,
       currentRound: json['currentRound'] as int,
       half: json['half'] as bool,
+      started: json['started'] as bool,
       players: (json['players'] as List<dynamic>)
           .map((e) => Player.fromJson(e as Map<String, dynamic>))
           .toList(),
@@ -26,6 +27,7 @@ Map<String, dynamic> _$RoomToJson(Room instance) => <String, dynamic>{
       'maxRounds': instance.maxRounds,
       'currentRound': instance.currentRound,
       'half': instance.half,
+      'started': instance.started,
       'players': instance.players,
       'rounds': instance.rounds,
     };

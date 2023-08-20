@@ -20,6 +20,7 @@ class Room {
     required this.maxRounds,
     required this.currentRound,
     required this.half,
+    required this.started,
     required this.players,
     required this.rounds,
   });
@@ -38,6 +39,9 @@ class Room {
 
   /// A bool value determining if we are in half time or not
   bool half;
+
+  /// A bool value determining if we have started the game or not
+  bool started;
 
   /// An array of the players in our game
   final List<Player> players;

@@ -35,6 +35,11 @@ const roomSchema = new mongoose.Schema({
         type: Boolean,
         default: false
     },
+    started: {
+        required: true,
+        type: Boolean,
+        default: false,
+    },
     gameMaster: gameMasterSchema,
     players: [playerSchema],
     rounds: [roundSchema],
