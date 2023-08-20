@@ -102,9 +102,16 @@ class _BettingViewState extends ConsumerState<BettingView> {
   Widget _buildBet() {
     _room = ref.watch(roomViewModel).room!;
     _player = ref.watch(roomViewModel).player!;
-    Bet currentBet = _room.rounds[_room.currentRound].bets
-        .firstWhere((bet) => bet.playerId == _player.id);
-    if (currentBet != -1) {
+    Bet? currentBet;
+    final bets = _room.rounds[_room.currentRound].bets;
+
+    for (final bet in bets) {
+      if (bet.playerId == _player.id) {
+        currentBet = bet;
+        break;
+      }
+    }
+    if (currentBet != null) {
       return WaitingView(currentBet: currentBet);
     } else if (_kill == null) {
       return Column(

@@ -1,7 +1,7 @@
 const mongoose = require('mongoose')
 
 export interface Bet {
-    playerId: number
+    playerId: string
     kill: boolean
     type: BetType
     amount: number
@@ -16,7 +16,7 @@ export enum BetType {
 const betSchema = new mongoose.Schema({
     playerId: {
         required: true,
-        type: Number,
+        type: String,
     },
     kill: {
         required: true,
