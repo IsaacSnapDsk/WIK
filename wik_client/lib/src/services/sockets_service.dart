@@ -5,7 +5,6 @@ import 'package:wik_client/src/models/room.dart';
 import 'package:wik_client/src/models/game_master.dart';
 import 'package:wik_client/src/models/player.dart';
 import 'package:wik_client/src/models/bet.dart';
-import 'package:wik_client/src/services/room_view_model.dart';
 import 'package:wik_client/src/services/sockets_client.dart';
 import 'package:wik_client/src/services/sockets_subscriber.dart';
 
@@ -80,6 +79,17 @@ class SocketsService {
     );
   }
 
+  /// Sends a "startGame" event to our Server
+  void startGame(String roomId, String secret) {
+    _client.emit(
+      'startGame',
+      {
+        'roomId': roomId,
+        'secret': secret,
+      },
+    );
+  }
+
   /// SOCKET LISTENERS
 
   /// Listens to the "createRoomSuccess" event
@@ -99,7 +109,18 @@ class SocketsService {
   /// Listens to the "joinRoomSuccess" event
   void joinRoomSuccessListener(BuildContext context) {
     _client.on('joinRoomSuccess', (response) {
-      //  Convert our players into players
+      //  Convert our room into a room
+      _room = Room.fromJson(response);
+
+      //  Tell our subscribers to refresh
+      notifySubscribers();
+    });
+  }
+
+  /// Listens to the "startGameSuccess" event
+  void startGameSuccessListener(BuildContext context) {
+    _client.on("startGameSuccess", (response) {
+      //  Convert our room to an actual room
       _room = Room.fromJson(response);
 
       //  Tell our subscribers to refresh

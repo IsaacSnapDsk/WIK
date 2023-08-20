@@ -64,6 +64,11 @@ class RoomViewModel extends ChangeNotifier implements SocketsSubscriber {
     socketsService.joinRoomSuccessListener(context);
   }
 
+  //  Subscribe to the "startGameSuccess" listener
+  void subscribeToStartGameSuccess(BuildContext context) {
+    socketsService.startGameSuccessListener(context);
+  }
+
   /// EVENTS
 
   //  Sends a "createRoom" event to the server
@@ -82,5 +87,10 @@ class RoomViewModel extends ChangeNotifier implements SocketsSubscriber {
   void bet(String roomId, Bet bet) {
     //  Tell our sockets service we want to bet
     socketsService.bet(roomId, bet);
+  }
+
+  //  Sends a "startGame" event to the server
+  void startGame(String roomId, String secret) {
+    socketsService.startGame(roomId, secret);
   }
 }
