@@ -1,5 +1,6 @@
 import 'package:json_annotation/json_annotation.dart';
 import 'package:wik_client/src/models/bet.dart';
+import 'package:wik_client/src/models/score.dart';
 
 //  This is required to generate the JSON conversions
 part 'round.g.dart';
@@ -20,6 +21,7 @@ class Round {
     this.kill,
     required this.turn,
     required this.bets,
+    required this.scores,
   });
 
   /// Unique identifier for our room
@@ -34,7 +36,11 @@ class Round {
   /// An enum value representing what our current turn is
   String turn;
 
+  /// A list of a round's bets
   final List<Bet> bets;
+
+  /// A list of a round's scores
+  final List<Score> scores;
 
   /// Connect the generated [_$RoundFromJson] function to the `fromJson`
   /// factory.

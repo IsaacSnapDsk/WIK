@@ -14,6 +14,9 @@ Round _$RoundFromJson(Map<String, dynamic> json) => Round(
       bets: (json['bets'] as List<dynamic>)
           .map((e) => Bet.fromJson(e as Map<String, dynamic>))
           .toList(),
+      scores: (json['scores'] as List<dynamic>)
+          .map((e) => Score.fromJson(e as Map<String, dynamic>))
+          .toList(),
     );
 
 Map<String, dynamic> _$RoundToJson(Round instance) => <String, dynamic>{
@@ -22,4 +25,5 @@ Map<String, dynamic> _$RoundToJson(Round instance) => <String, dynamic>{
       'kill': instance.kill,
       'turn': instance.turn,
       'bets': instance.bets,
+      'scores': instance.scores,
     };

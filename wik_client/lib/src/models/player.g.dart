@@ -14,6 +14,9 @@ Player _$PlayerFromJson(Map<String, dynamic> json) => Player(
       drinks: json['drinks'] as int,
       shots: json['shots'] as int,
       bb: json['bb'] as int,
+      bets: (json['bets'] as List<dynamic>)
+          .map((e) => Bet.fromJson(e as Map<String, dynamic>))
+          .toList(),
     );
 
 Map<String, dynamic> _$PlayerToJson(Player instance) => <String, dynamic>{

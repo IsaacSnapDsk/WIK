@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const { betSchema } = require("./bet");
+const { scoreSchema } = require('./score');
 import { Bet } from "./bet"
 
 export interface Round {
@@ -36,7 +37,8 @@ const roundSchema = new mongoose.Schema({
         type: Boolean,
         default: false
     },
-    bets: [betSchema]
+    bets: [betSchema],
+    scores: [scoreSchema],
 });
 
 const roundModel = mongoose.model("Round", roundSchema);
