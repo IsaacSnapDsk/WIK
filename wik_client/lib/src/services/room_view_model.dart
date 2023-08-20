@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:wik_client/src/models/game_master.dart';
 import 'package:wik_client/src/models/player.dart';
 import 'package:wik_client/src/models/room.dart';
+import 'package:wik_client/src/models/bet.dart';
 import 'package:wik_client/src/services/sockets_service.dart';
 import 'package:wik_client/src/services/sockets_subscriber.dart';
 
@@ -75,5 +76,11 @@ class RoomViewModel extends ChangeNotifier implements SocketsSubscriber {
   void joinRoom(String roomId, String nickname) {
     //  Tell our sockets service we want to join a room
     socketsService.joinRoom(roomId, nickname);
+  }
+
+  // Sends a "bet" event to the server
+  void bet(String roomId, Bet bet) {
+    //  Tell our sockets service we want to bet
+    socketsService.bet(roomId, bet);
   }
 }

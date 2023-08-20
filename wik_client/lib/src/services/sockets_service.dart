@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:socket_io_client/socket_io_client.dart';
+import 'package:wik_client/src/models/room.dart';
 import 'package:wik_client/src/models/game_master.dart';
 import 'package:wik_client/src/models/player.dart';
-import 'package:wik_client/src/models/room.dart';
+import 'package:wik_client/src/models/bet.dart';
+import 'package:wik_client/src/services/room_view_model.dart';
 import 'package:wik_client/src/services/sockets_client.dart';
 import 'package:wik_client/src/services/sockets_subscriber.dart';
 
@@ -67,6 +69,17 @@ class SocketsService {
     );
   }
 
+  //  Sends a "bet" event to our Server
+  void bet(String roomId, Bet bet) {
+    _client.emit(
+      'bet',
+      {
+        'roomId': roomId,
+        'bet': bet,
+      },
+    );
+  }
+
   /// SOCKET LISTENERS
 
   /// Listens to the "createRoomSuccess" event
@@ -86,6 +99,17 @@ class SocketsService {
   /// Listens to the "joinRoomSuccess" event
   void joinRoomSuccessListener(BuildContext context) {
     _client.on('joinRoomSuccess', (response) {
+      //  Convert our players into players
+      _room = Room.fromJson(response);
+
+      //  Tell our subscribers to refresh
+      notifySubscribers();
+    });
+  }
+
+  /// Listens to the "joinRoomSuccess" event
+  void betSuccessListener(BuildContext context) {
+    _client.on('betSuccess', (response) {
       //  Convert our players into players
       _room = Room.fromJson(response);
 
