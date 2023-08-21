@@ -52,7 +52,7 @@ const startCalculating = async (room): Promise<Room> => {
         let curr = bets[i]
 
         //  Find the player for this bet
-        let player = room.players.find(x => x.id === curr.playerId)
+        let playerIdx = room.players.findIndex(x => x.id === curr.playerId)
 
         //  Create a score for this player based on the win
         let score = new scoreModel({
@@ -67,7 +67,11 @@ const startCalculating = async (room): Promise<Room> => {
         scores.push(score)
 
         //  Add this score to this player's scores
-        player.scores.push(score)
+        room.players[playerIdx].scores.push(score)
+        //  Add a win to the player if they won this round
+        room.players[playerIdx].wins + win ? 1 : 0
+        //  Save our player?
+        room.players[playerIdx].save()
     }
 
     //  Attach our scores to our round
@@ -229,24 +233,20 @@ io.on("connection", (socket) => {
 
     socket.on("startGame", async ({ roomId, gmId }) => {
         try {
-            console.log('starting game', roomId, gmId)
             //  Grab our current room
             const room = await roomModel.findById(roomId)
-            console.log('room', room)
 
             //  If it isn't found, return an error
             if (!room) return socket.emit("errorOccurred", "Room not found.")
 
             //  Find our game master with this secret
             const gameMaster = await gameMasterModel.findById(gmId)
-            console.log('game master', gameMaster)
 
             //  If it isn't found, return an error
             if (!gameMaster) return socket.emit("errorOccurred", "Game Master not found")
 
             //  Check if this game master belongs to this room
             const belongs = gameMaster.roomId === roomId
-            console.log('belongs', belongs)
 
             //  If they dont, return an error
             if (!belongs) return socket.emit("errorOccurred", "Game Master and Room do not match")
@@ -265,7 +265,7 @@ io.on("connection", (socket) => {
         }
     })
 
-    socket.on("betSuccess", async ({ roomId, bet }) => {
+    socket.on("submitBet", async ({ roomId, bet }) => {
         try {
             //  Grab our current room
             const room = await roomModel.findById(roomId)
@@ -309,48 +309,107 @@ io.on("connection", (socket) => {
         }
     })
 
-    // socket.on("stopVoting", async ({ roomId }) => {
-    //     try {
-    //         //  TODO add validation that prevents changing under following circumstances:
-
-    //         //  Grab our current room
-    //         const room = await roomModel.findById(roomId)
-
-    //         //  TODO make it so players cannot join in the middle
-
-    //         //  Set our next turn
-    //         const savedRoom = await stopVoting(room)
-
-
-    //         //  Grab the current round
-    //         const currentRound = savedRoom.rounds[savedRoom.currentRound]
-
-    //         //  Return our new turn
-    //         io.to(roomId).emit("changeTurnSuccess", currentRound)
-    //     }
-    //     catch (e) {
-    //         console.log(`Error stopping voting ${e}`)
-    //     }
-    // })
-
-    socket.on("startCalculating", async ({ roomId, kill }) => {
+    socket.on("stopBetting", async ({ roomId, gmId }) => {
         try {
             //  Grab our current room
             const room = await roomModel.findById(roomId)
 
-            //  Set the current round's result
-            room.kill = kill
+            //  If it isn't found, return an error
+            if (!room) return socket.emit("errorOccurred", "Room not found.")
 
-            //  Start calculating
+            //  Find our game master with this secret
+            const gameMaster = await gameMasterModel.findById(gmId)
+
+            //  If it isn't found, return an error
+            if (!gameMaster) return socket.emit("errorOccurred", "Game Master not found")
+
+            //  Check if this game master belongs to this room
+            const belongs = gameMaster.roomId === roomId
+
+            //  If they dont, return an error
+            if (!belongs) return socket.emit("errorOccurred", "Game Master and Room do not match")
+
+            //  Grab the current round
+            const currentRound = room.rounds[room.currentRound]
+
+            //  Update our turn to Waiting
+            currentRound.turn = Turn.Waiting
+
+            //  Update the room's current round
+            room.rounds[room.currentRound] = currentRound
+
+            //  Save our changes
+            room.save()
+
+            //  Return our new room
+            io.to(roomId).emit("changeTurnSuccess", room)
+        }
+        catch (e) {
+            console.log(`Error stopping voting ${e}`)
+        }
+    })
+
+    socket.on("stopWaiting", async ({ roomId, gmId, kill }) => {
+        try {
+            //  Grab our current room
+            const room = await roomModel.findById(roomId)
+
+            //  If it isn't found, return an error
+            if (!room) return socket.emit("errorOccurred", "Room not found.")
+
+            //  Find our game master with this secret
+            const gameMaster = await gameMasterModel.findById(gmId)
+
+            //  If it isn't found, return an error
+            if (!gameMaster) return socket.emit("errorOccurred", "Game Master not found")
+
+            //  Check if this game master belongs to this room
+            const belongs = gameMaster.roomId === roomId
+
+            //  If they dont, return an error
+            if (!belongs) return socket.emit("errorOccurred", "Game Master and Room do not match")
+
+            //  Grab the current round
+            const currentRound = room.rounds[room.currentRound]
+
+            //  Update the round with our kill
+            currentRound.kill = kill
+
+            //  Update our turn to Waiting
+            currentRound.turn = Turn.Results
+
+            //  Update the room's current round
+            room.rounds[room.currentRound] = currentRound
+
+            //  Calculate
             const savedRoom = await startCalculating(room)
 
-            //  Return our saved room
+            //  Return our new room
             io.to(roomId).emit("changeTurnSuccess", savedRoom)
         }
         catch (e) {
-            console.log(`Error starting calculating ${e}`)
+            console.log(`Error stopping voting ${e}`)
         }
     })
+
+    // socket.on("startCalculating", async ({ roomId, kill }) => {
+    //     try {
+    //         //  Grab our current room
+    //         const room = await roomModel.findById(roomId)
+
+    //         //  Set the current round's result
+    //         room.kill = kill
+
+    //         //  Start calculating
+    //         const savedRoom = await startCalculating(room)
+
+    //         //  Return our saved room
+    //         io.to(roomId).emit("changeTurnSuccess", savedRoom)
+    //     }
+    //     catch (e) {
+    //         console.log(`Error starting calculating ${e}`)
+    //     }
+    // })
 
     socket.on("countResults", async ({ roomId }) => {
         try {

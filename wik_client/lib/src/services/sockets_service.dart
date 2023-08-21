@@ -68,10 +68,10 @@ class SocketsService {
     );
   }
 
-  //  Sends a "betSuccess" event to our Server
-  void bet(String roomId, Bet bet) {
+  //  Sends a "submitBet" event to our Server
+  void submitBet(String roomId, Bet bet) {
     _client.emit(
-      'betSuccess',
+      'submitBet',
       {
         'roomId': roomId,
         'bet': bet,
@@ -90,7 +90,41 @@ class SocketsService {
     );
   }
 
+  /// Sends a "stopBetting" event to ur Server
+  void stopBetting(String roomId, String gmId) {
+    _client.emit(
+      'stopBetting',
+      {
+        'roomId': roomId,
+        'gmId': gmId,
+      },
+    );
+  }
+
+  /// Sends a "stopWaiting" event to ur Server
+  void stopWaiting(String roomId, String gmId, bool kill) {
+    _client.emit(
+      'stopWaiting',
+      {
+        'roomId': roomId,
+        'gmId': gmId,
+        'kill': kill,
+      },
+    );
+  }
+
   /// SOCKET LISTENERS
+
+  /// Listens to the "changeTurnSuccess" event
+  void changeTurnSuccessListener(BuildContext context) {
+    _client.on('changeTurnSuccess', (response) {
+      //  Create our room
+      _room = Room.fromJson(response);
+
+      //  Tell our subscribes to refresh
+      notifySubscribers();
+    });
+  }
 
   /// Listens to the "createRoomSuccess" event
   void createRoomSuccessListener(BuildContext context) {

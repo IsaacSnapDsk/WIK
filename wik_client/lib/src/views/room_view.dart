@@ -30,6 +30,9 @@ class _RoomViewState extends ConsumerState<RoomView> {
 
       //  Subscribe to game start events
       vm.subscribeToStartGameSuccess(context);
+
+      //  Subscribe to turn change events
+      vm.subscribeToChangeTurnSuccessListener(context);
     });
   }
 
