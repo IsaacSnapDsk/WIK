@@ -10,7 +10,7 @@ part 'round.g.dart';
 /// a [Room].
 ///
 /// Round belong to a single [Room]
-/// Round has many [Vote]
+/// Round has many [Bet]
 ///
 @JsonSerializable()
 class Round {

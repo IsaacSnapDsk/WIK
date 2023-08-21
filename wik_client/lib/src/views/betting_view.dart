@@ -35,19 +35,7 @@ class _BettingViewState extends ConsumerState<BettingView> {
   /// Local player instance
   late Player _player;
 
-  // @override
-  // void initState() {
-  //   super.initState();
-
-  //   WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-  //     //  Get our view model
-  //     final vm = ref.watch(votingViewModel);
-
-  //     vm.subscribeToTestSuccess(context);
-  //     vm.subscribeToJoinRoomSuccess(context);
-  //   });
-  // }
-
+  //Calculates if the player can submit their bet
   void _calcCanSubmit() {
     setState(() {
       //  If ANY of our values are null, this is false
@@ -58,6 +46,7 @@ class _BettingViewState extends ConsumerState<BettingView> {
     });
   }
 
+  // Sets wager state and checks if player can submit
   void _onWagerChanged(String? val) {
     //  Update our nickname value
     _wager = val!;
@@ -66,6 +55,7 @@ class _BettingViewState extends ConsumerState<BettingView> {
     _calcCanSubmit();
   }
 
+  // Sets amount state and checks if player can submit
   void _onAmountChanged(String val) {
     //  Parse the value into an integer
     final num = val.isNotEmpty ? int.parse(val) : null;
@@ -77,6 +67,7 @@ class _BettingViewState extends ConsumerState<BettingView> {
     _calcCanSubmit();
   }
 
+  // Submits the bet to the server
   void _onSubmitBet() {
     //  Create our bet
     final bet = _createBet();
@@ -88,6 +79,7 @@ class _BettingViewState extends ConsumerState<BettingView> {
     vm.submitBet(_room.id, bet);
   }
 
+  /// Creates a bet from the current state in the form of the [Bet] model
   Bet _createBet() {
     return Bet(
       playerId: _player.id,
@@ -97,20 +89,29 @@ class _BettingViewState extends ConsumerState<BettingView> {
     );
   }
 
-  Widget _buildBet() {
+  Widget _buildBetting() {
+    /// Get the current room and player from the view model
+    /// to get the submited bet from the server
     _room = ref.watch(roomViewModel).room!;
     _player = ref.watch(roomViewModel).player!;
+
+    /// Find the  player's current bet from the list of bets
+    /// in the current round
     Bet? currentBet;
     final bets = _room.rounds[_room.currentRound].bets;
-
     for (final bet in bets) {
       if (bet.playerId == _player.id) {
         currentBet = bet;
         break;
       }
     }
+
+    // If client has the current bet, show the waiting view
     if (currentBet != null) {
       return WaitingView(currentBet: currentBet);
+
+      /// If the client does not have the current bet and the player has
+      /// not chosen kill, show the betting view
     } else if (_kill == null) {
       return Column(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -186,6 +187,9 @@ class _BettingViewState extends ConsumerState<BettingView> {
           )
         ],
       );
+
+      /// If the client does not have the current bet and the player has
+      /// chosen kill, show the type and amount
     } else {
       return Column(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -254,7 +258,7 @@ class _BettingViewState extends ConsumerState<BettingView> {
             width: 300,
             height: 400,
             padding: const EdgeInsets.all(8.0),
-            child: _buildBet()),
+            child: _buildBetting()),
       ),
     );
   }
