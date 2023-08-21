@@ -38,7 +38,7 @@ const startCalculating = async (room): Promise<Room> => {
     const round = room.rounds[room.currentRound]
 
     //  Grab our bets
-    const bets = room.bets
+    const bets = round.bets
 
     //  Create our array of scores
     const scores = []
@@ -333,13 +333,15 @@ io.on("connection", (socket) => {
             const currentRound = room.rounds[room.currentRound]
 
             //  Update our turn to Waiting
-            currentRound.turn = Turn.Waiting
+            // currentRound.turn = Turn.Waiting
+            currentRound.turn = 'Waiting'
 
             //  Update the room's current round
             room.rounds[room.currentRound] = currentRound
 
             //  Save our changes
             room.save()
+            console.log('about to go')
 
             //  Return our new room
             io.to(roomId).emit("changeTurnSuccess", room)
@@ -376,7 +378,8 @@ io.on("connection", (socket) => {
             currentRound.kill = kill
 
             //  Update our turn to Waiting
-            currentRound.turn = Turn.Results
+            // currentRound.turn = Turn.Results
+            currentRound.turn = "Results"
 
             //  Update the room's current round
             room.rounds[room.currentRound] = currentRound

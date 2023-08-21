@@ -116,11 +116,6 @@ class _ResultsViewState extends ConsumerState<ResultsView> {
   }
 
   Widget _buildResults() {
-    /// Get the current room and player from the view model
-    /// to get the submited bet from the server
-    _room = ref.watch(roomViewModel).room!;
-    _player = ref.watch(roomViewModel).player!;
-
     /// Find the player's current bet from the list of bets
     /// in the current round
     final bets = _room.rounds[_room.currentRound].bets;
@@ -189,6 +184,11 @@ class _ResultsViewState extends ConsumerState<ResultsView> {
 
   @override
   Widget build(BuildContext context) {
+    /// Get the current room and player from the view model
+    /// to get the submited bet from the server
+    _room = ref.watch(roomViewModel).room!;
+    _player = ref.watch(roomViewModel).player!;
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.primary,

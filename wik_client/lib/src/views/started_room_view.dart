@@ -6,6 +6,7 @@ import 'package:wik_client/src/services/room_view_model.dart';
 import 'package:wik_client/src/views/betting_view.dart';
 import 'package:wik_client/src/views/game_master_betting_view.dart';
 import 'package:wik_client/src/views/game_master_waiting_view.dart';
+import 'package:wik_client/src/views/results_view.dart';
 
 class StartedRoomView extends ConsumerStatefulWidget {
   const StartedRoomView({super.key});
@@ -56,6 +57,7 @@ class _StartedRoomViewState extends ConsumerState<StartedRoomView> {
           onStopWaiting: (bool val) =>
               vm.stopWaiting(_room.id, _gameMaster!.id, val),
         );
+      case 'Results':
       default:
         return _buildPlaceholder();
       // case 'Resulting':
@@ -98,6 +100,10 @@ class _StartedRoomViewState extends ConsumerState<StartedRoomView> {
     switch (currentRound.turn) {
       case 'Betting':
         return const BettingView();
+      case 'Waiting':
+        return const BettingView();
+      case 'Results':
+        return const ResultsView();
       default:
         return _buildPlaceholder();
     }
