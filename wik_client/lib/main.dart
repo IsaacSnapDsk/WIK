@@ -6,6 +6,7 @@ import 'package:wik_client/src/services/room_view_model.dart';
 import 'package:wik_client/src/views/create_room_view.dart';
 import 'package:wik_client/src/views/join_room_view.dart';
 import 'package:wik_client/src/views/room_view.dart';
+import 'package:wik_client/src/views/results_view.dart';
 
 Future main() async {
   // Load our .env file
