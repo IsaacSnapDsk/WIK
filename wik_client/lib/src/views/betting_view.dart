@@ -1,5 +1,3 @@
-import 'dart:ffi';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -157,37 +155,34 @@ class _BettingViewState extends ConsumerState<BettingView> {
               ),
             ],
           ),
-          Row(
-            children: [
-              ElevatedButton(
-                style: const ButtonStyle(
-                  backgroundColor: MaterialStatePropertyAll(
-                    Colors.black,
-                  ),
-                  foregroundColor: MaterialStatePropertyAll(
-                    Colors.white,
+          SizedBox(
+            // height: 100,
+            width: 150,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Text(
+                  "ROCK",
+                  style: TextStyle(
+                    fontSize: 48,
                   ),
                 ),
-                child: const Text("ROCK"),
-                onPressed: () {
-                  setState(() {
-                    _kill = true;
-                    _wager = "SHOTS";
-                    _amount = 2;
-                    print('kill: $_kill, wager: $_wager, amount: $_amount');
-                    _onSubmitBet();
-                  });
-                  // Navigator.push(
-                  //   context,
-                  //   MaterialPageRoute(
-                  //     builder: (_) {
-                  //       return const WaitingView();
-                  //     },
-                  //   ),
-                  // ),
-                },
-              ),
-            ],
+                IconButton(
+                  iconSize: 150,
+                  icon: const Icon(Icons.do_not_touch),
+                  onPressed: () {
+                    setState(() {
+                      _kill = true;
+                      _wager = "SHOTS";
+                      _amount = 2;
+                      print('kill: $_kill, wager: $_wager, amount: $_amount');
+                      _onSubmitBet();
+                    });
+                  },
+                ),
+              ],
+            ),
           )
         ],
       );
@@ -257,7 +252,7 @@ class _BettingViewState extends ConsumerState<BettingView> {
       body: Center(
         child: Container(
             width: 300,
-            height: 300,
+            height: 400,
             padding: const EdgeInsets.all(8.0),
             child: _buildBet()),
       ),
