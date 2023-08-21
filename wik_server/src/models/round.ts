@@ -8,6 +8,7 @@ export interface Round {
     kill: boolean
     turn: Turn
     half: boolean
+    punishments: number
     bets: Bet[]
 }
 
@@ -36,6 +37,10 @@ const roundSchema = new mongoose.Schema({
         required: true,
         type: Boolean,
         default: false
+    },
+    punishments: {
+        type: Number,
+        default: 0
     },
     bets: [betSchema],
     scores: [scoreSchema],

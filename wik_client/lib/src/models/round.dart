@@ -20,6 +20,8 @@ class Round {
     required this.no,
     this.kill,
     required this.turn,
+    required this.half,
+    this.punishments,
     required this.bets,
     required this.scores,
   });
@@ -32,6 +34,12 @@ class Round {
 
   /// A bool value that determines if this round was a kill or not
   final bool? kill;
+
+  /// A bool value that determines if we in half time or not
+  final bool? half;
+
+  /// A number for the number of punishments to be dished out, starts at 0
+  final int? punishments;
 
   /// An enum value representing what our current turn is
   String turn;

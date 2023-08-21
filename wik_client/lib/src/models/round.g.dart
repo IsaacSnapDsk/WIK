@@ -10,6 +10,8 @@ Round _$RoundFromJson(Map<String, dynamic> json) => Round(
       id: json['_id'] as String,
       no: json['no'] as int,
       kill: json['kill'] as bool?,
+      half: json['half'] as bool?,
+      punishments: json['punishments'] as int?,
       turn: json['turn'] as String,
       bets: (json['bets'] as List<dynamic>)
           .map((e) => Bet.fromJson(e as Map<String, dynamic>))
