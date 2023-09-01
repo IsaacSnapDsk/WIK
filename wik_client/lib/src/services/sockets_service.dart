@@ -113,6 +113,18 @@ class SocketsService {
     );
   }
 
+  /// Sends a "submitPunishment" event to our Server
+  void submitPunishment(String roomId, String playerId, List punishment) {
+    _client.emit(
+      'submitPunishment',
+      {
+        'roomId': roomId,
+        'playerId': playerId,
+        'punishment': punishment,
+      },
+    );
+  }
+
   /// SOCKET LISTENERS
 
   /// Listens to the "changeTurnSuccess" event
@@ -184,6 +196,17 @@ class SocketsService {
   /// Listens to the "betSuccess" event
   void betSuccessListener(BuildContext context) {
     _client.on('betSuccess', (response) {
+      //  Convert our players into players
+      _room = Room.fromJson(response);
+
+      //  Tell our subscribers to refresh
+      notifySubscribers();
+    });
+  }
+
+  /// Listens to the "betSuccess" event
+  void punishmentSuccessListener(BuildContext context) {
+    _client.on('punismentSuccess', (response) {
       //  Convert our players into players
       _room = Room.fromJson(response);
 

@@ -89,6 +89,11 @@ class RoomViewModel extends ChangeNotifier implements SocketsSubscriber {
     socketsService.betSuccessListener(context);
   }
 
+  //  Subscribe to the "subscribeTBetSuccess" listener
+  void subscribeToPunishmentSuccess(BuildContext context) {
+    socketsService.punishmentSuccessListener(context);
+  }
+
   /// EVENTS
 
   //  Sends a "createRoom" event to the server
@@ -122,5 +127,10 @@ class RoomViewModel extends ChangeNotifier implements SocketsSubscriber {
   //  Sends a "stopWaiting" event to the server
   void stopWaiting(String roomId, String gmId, bool kill) {
     socketsService.stopWaiting(roomId, gmId, kill);
+  }
+
+  //  Sends a "submitPunishment" event to the server
+  void submitPunishment(String roomId, String playerId, List punishments) {
+    socketsService.submitPunishment(roomId, playerId, punishments);
   }
 }

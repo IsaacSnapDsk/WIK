@@ -38,9 +38,6 @@ class _ResultsViewState extends ConsumerState<ResultsView> {
   /// List of [Punishmnets] to be submited
   final List<Punishment> _punishments = [];
 
-  /// List of other players
-  final List _otherPlayers = [];
-
   /// The players current bet
   late Bet _currentBet;
 
@@ -55,19 +52,6 @@ class _ResultsViewState extends ConsumerState<ResultsView> {
 
   /// Determines if the player won or not
   bool _win = false;
-
-  @override
-  void initState() {
-    super.initState();
-
-    for (var player in _otherPlayers) {
-      _punishments.add(Punishment(
-        playerId: player.playerId,
-        playerName: player.name,
-        amount: 0,
-      ));
-    }
-  }
 
   //Calculates if the player can submit their bet
   void _calcCanSubmit() {
@@ -112,7 +96,7 @@ class _ResultsViewState extends ConsumerState<ResultsView> {
     final vm = ref.watch(roomViewModel);
 
     //  Submit our bet
-    // vm.submitPunishments(_room.id, _player.id, punishmentsToSubmit);
+    vm.submitPunishment(_room.id, _player.id, punishmentsToSubmit);
   }
 
   Widget _buildResults() {
@@ -129,9 +113,13 @@ class _ResultsViewState extends ConsumerState<ResultsView> {
     /// Find the other players from the list of players
     /// in the current round
     final players = _room.players;
-    for (final player in players) {
+    for (var player in players) {
       if (player.id != _player.id) {
-        _otherPlayers.add(player);
+        _punishments.add(Punishment(
+          playerId: player.id,
+          playerName: player.name,
+          amount: 0,
+        ));
       }
     }
 

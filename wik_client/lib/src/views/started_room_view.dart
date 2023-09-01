@@ -34,6 +34,7 @@ class _StartedRoomViewState extends ConsumerState<StartedRoomView> {
       vm.subscribeToBetSuccess(context);
 
       //  Subscribe to turn change events
+      vm.subscribeToPunishmentSuccess(context);
     });
   }
 

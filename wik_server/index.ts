@@ -395,6 +395,61 @@ io.on("connection", (socket) => {
         }
     })
 
+    socket.on("submitPunishment", async ({ roomId, playerId, punishment }) => {
+        try {
+            //  Grab our current room
+            const room = await roomModel.findById(roomId)
+
+            //  If it isn't found, return an error
+            if (!room) return socket.emit("errorOccurred", "Room not found.")
+
+            //  Find the player matching this bet id
+            const player = await playerModel.findById(playerId)
+
+            //  If it isn't found, return an error
+            if (!player) return socket.emit("errorOccurred", "Player does not exist.")
+
+            //  Grab our current round
+            const round = room.rounds[room.currentRound]
+
+            //  Grab our scores
+            const scores = round.scores
+
+            //  Iterate through each vote to compute results
+            for (let i = 0; i < punishment.length; i++) {
+                for (let j = 0; j < scores.length; j++) {
+                    if (scores[j].playerId === punishment[i].playerId) {
+                        if (punishment[i].type === 'drinks') scores[j].drinks += punishment[i].amount
+                        else if (punishment[i].type === 'shots') scores[j].shots += punishment[i].amount
+                        else if (punishment[i].type === 'bb') scores[j].bb += punishment[i].amount
+
+                        //  Add this score to this player's scores
+                        room.players[playerId].scores
+                        //  Save our player?
+                        room.players[playerId].save()
+                        break
+                    }
+                }
+            }
+
+            //  Attach our scores to our round
+            round.scores = scores
+
+            //  Update the round for our room
+            room.rounds[room.currentRound] = round
+
+            //  SAae the changes
+            const savedRoom = room.save()
+
+            //  Notify the player
+            socket.emit('punismentSuccess', savedRoom)
+        }
+        catch (e) {
+            console.log(`Error submitting punishment ${e}`)
+        }
+
+    })
+
     // socket.on("startCalculating", async ({ roomId, kill }) => {
     //     try {
     //         //  Grab our current room
