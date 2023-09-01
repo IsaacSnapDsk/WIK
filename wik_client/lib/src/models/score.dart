@@ -14,7 +14,6 @@ class Score {
   //  Constructor
   const Score({
     required this.playerId,
-    required this.win,
     required this.drinks,
     required this.shots,
     required this.bb,
@@ -22,9 +21,6 @@ class Score {
 
   /// Unique identifier for our player
   final String playerId;
-
-  /// A number representing if the player won for this round or not
-  final int win;
 
   /// A number representing their total number of drinks for htis player during this round
   final int drinks;

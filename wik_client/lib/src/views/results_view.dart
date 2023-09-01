@@ -5,47 +5,30 @@ import 'package:wik_client/src/services/room_view_model.dart';
 import 'package:wik_client/src/models/room.dart';
 import 'package:wik_client/src/models/player.dart';
 import 'package:wik_client/src/models/bet.dart';
-
-class Punishment {
-  //  Constructor
-  Punishment({
-    required this.playerId,
-    required this.playerName,
-    required this.amount,
-  });
-
-  /// identifier for which player made the bet
-  final String playerId;
-
-  /// The name of the player
-  final String playerName;
-
-  /// If it is kill or not
-  int amount;
-}
+import 'package:wik_client/src/models/score.dart';
 
 class ResultsView extends ConsumerStatefulWidget {
   const ResultsView({super.key});
-
-  // /// The current bet
-  // final Bet currentBet;
 
   @override
   ConsumerState<ResultsView> createState() => _ResultsViewState();
 }
 
 class _ResultsViewState extends ConsumerState<ResultsView> {
-  /// List of [Punishmnets] to be submited
-  final List<Punishment> _punishments = [];
+  /// Map of [Player]s to their punishment amount
+  final Map<String, int> _scores = {};
+
+  /// Local [List] of other [Player]s in the room
+  late List<Player> _otherPlayers;
+
+  /// Local [Player] instance
+  late Player _player;
 
   /// The players current bet
   late Bet _currentBet;
 
   /// Local room instance
   late Room _room;
-
-  /// Local player instance
-  late Player _player;
 
   /// Determines if we can submit the form or not
   bool _canSubmit = false;
@@ -57,12 +40,7 @@ class _ResultsViewState extends ConsumerState<ResultsView> {
   void _calcCanSubmit() {
     setState(() {
       // Total punishment amount
-      int total = 0;
-
-      // Parse the _punishments and get total value
-      for (final pun in _punishments) {
-        total += pun.amount;
-      }
+      int total = _scores.values.reduce((a, b) => a + b);
 
       //  If ANY of our values are null, this is false
       final canSubmit = total == _currentBet.amount;
@@ -72,31 +50,33 @@ class _ResultsViewState extends ConsumerState<ResultsView> {
     });
   }
 
-  void _onPunishmentChanged(String value, int idx) {
-    _punishments[idx].amount = value.isEmpty ? 0 : int.parse(value);
+  void _onPunishmentChanged(String value, String playerId) {
+    _scores[playerId] = value.isEmpty ? 0 : int.parse(value);
 
     _calcCanSubmit();
   }
 
   // Submits the bet to the server
   void _onSubmitPunishments() {
-    final List punishmentsToSubmit = [];
+    final List<Score> scoresToSubmit = [];
 
-    for (final punishment in _punishments) {
-      if (punishment.amount > 0) {
-        punishmentsToSubmit.add({
-          "playerId": punishment.playerId,
-          "type": _currentBet.type,
-          "amount": punishment.amount,
-        });
-      }
-    }
+    //  Check if we
+    final type = _currentBet.type;
+
+    _scores.forEach((id, amt) {
+      scoresToSubmit.add(Score(
+        playerId: id,
+        drinks: type == 'Drink' ? amt : 0,
+        shots: type == 'Shot' ? amt : 0,
+        bb: type == 'BB' ? amt : 0,
+      ));
+    });
 
     //  Get our view model
     final vm = ref.watch(roomViewModel);
 
     //  Submit our bet
-    vm.submitPunishment(_room.id, _player.id, punishmentsToSubmit);
+    vm.submitScores(_room.id, scoresToSubmit);
   }
 
   Widget _buildResults() {
@@ -110,40 +90,14 @@ class _ResultsViewState extends ConsumerState<ResultsView> {
       }
     }
 
-    /// Find the other players from the list of players
-    /// in the current round
-    final players = _room.players;
-    for (var player in players) {
-      if (player.id != _player.id) {
-        _punishments.add(Punishment(
-          playerId: player.id,
-          playerName: player.name,
-          amount: 0,
-        ));
-      }
-    }
-
-    if (_room.rounds[_room.currentRound].kill!) {
-      if (_currentBet.kill) {
-        _win = true;
-      } else {
-        _win = false;
-      }
-    } else {
-      if (_currentBet.kill) {
-        _win = false;
-      } else {
-        _win = true;
-      }
-    }
+    _win = _room.rounds[_room.currentRound].kill! == _currentBet.kill;
 
     if (_win) {
       return Column(children: [
         Text("You won! You get give ${_currentBet.amount} ${_currentBet.type}"),
         Column(children: [
           const Text("Select who you want to punish:"),
-          for (int i = 0; i < _punishments.length; i++)
-            _punshmentSelection(_punishments[i], i),
+          for (var player in _otherPlayers) _punshmentSelection(player),
           ElevatedButton(
               onPressed: () => _canSubmit ? _onSubmitPunishments() : null,
               child: const Text("Submit Punishment")),
@@ -154,9 +108,11 @@ class _ResultsViewState extends ConsumerState<ResultsView> {
     }
   }
 
-  Widget _punshmentSelection(Punishment punishment, int idx) {
+  Widget _punshmentSelection(Player player) {
+    /// Find the other players from the list of players
+    /// in the current round
     return Row(children: [
-      Card(child: Text(punishment.playerName)),
+      Card(child: Text(player.name)),
       Expanded(
         child: TextField(
           decoration: const InputDecoration(hintText: "Amount"),
@@ -164,9 +120,9 @@ class _ResultsViewState extends ConsumerState<ResultsView> {
           inputFormatters: <TextInputFormatter>[
             FilteringTextInputFormatter.digitsOnly
           ],
-          onChanged: (e) => _onPunishmentChanged(e, idx),
+          onChanged: (e) => _onPunishmentChanged(e, player.id),
         ),
-      )
+      ),
     ]);
   }
 
@@ -176,6 +132,7 @@ class _ResultsViewState extends ConsumerState<ResultsView> {
     /// to get the submited bet from the server
     _room = ref.watch(roomViewModel).room!;
     _player = ref.watch(roomViewModel).player!;
+    _otherPlayers = ref.watch(roomViewModel).otherPlayers();
 
     return Scaffold(
       appBar: AppBar(

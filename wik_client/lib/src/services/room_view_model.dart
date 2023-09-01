@@ -107,7 +107,7 @@ class RoomViewModel extends ChangeNotifier implements SocketsSubscriber {
 
   //  Subscribe to the "subscribeTBetSuccess" listener
   void subscribeToPunishmentSuccess(BuildContext context) {
-    socketsService.punishmentSuccessListener(context);
+    socketsService.submitScoresSuccessListener(context);
   }
 
   /// EVENTS
@@ -145,8 +145,8 @@ class RoomViewModel extends ChangeNotifier implements SocketsSubscriber {
     socketsService.stopWaiting(roomId, gmId, kill);
   }
 
-  //  Sends a "submitPunishment" event to the server
-  void submitPunishment(String roomId, String playerId, List punishments) {
-    socketsService.submitPunishment(roomId, playerId, punishments);
+  //  Sends a "submitScores" event to the server
+  void submitScores(String roomId, List scores) {
+    socketsService.submitScores(roomId, scores);
   }
 }

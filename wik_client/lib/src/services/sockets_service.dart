@@ -113,14 +113,13 @@ class SocketsService {
     );
   }
 
-  /// Sends a "submitPunishment" event to our Server
-  void submitPunishment(String roomId, String playerId, List punishment) {
+  /// Sends a "submitScores" event to our Server
+  void submitScores(String roomId, List scores) {
     _client.emit(
-      'submitPunishment',
+      'submitScores',
       {
         'roomId': roomId,
-        'playerId': playerId,
-        'punishment': punishment,
+        'scores': scores,
       },
     );
   }
@@ -205,8 +204,8 @@ class SocketsService {
   }
 
   /// Listens to the "betSuccess" event
-  void punishmentSuccessListener(BuildContext context) {
-    _client.on('punismentSuccess', (response) {
+  void submitScoresSuccessListener(BuildContext context) {
+    _client.on('submitScoresSuccess', (response) {
       //  Convert our players into players
       _room = Room.fromJson(response);
 
