@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:wik_client/src/models/game_master.dart';
@@ -50,6 +51,21 @@ class RoomViewModel extends ChangeNotifier implements SocketsSubscriber {
 
     //  Notify all listeners
     notifyListeners();
+  }
+
+  /// Helpers
+  List<Player> otherPlayers() {
+    //  Grab our current player id
+    final id = player!.id;
+
+    //  Grab ALL other players in the current room
+    final players = room!.players;
+
+    //  Filter out our current player
+    final otherPlayers = players.whereNot((player) => player.id != id).toList();
+
+    //  Return em :)
+    return otherPlayers;
   }
 
   /// LISTENERS
