@@ -5,13 +5,15 @@ const mongoose = require("mongoose");
 
 export interface Player {
     _id: string
+    socketId: string
     name: string
     wins: number
     drinks: number
     shots: number
-    bbs: number
-    bets: Bet[],
+    bb: number
+    bets: Bet[]
     scores: Score[]
+    punished: boolean
 }
 
 const playerSchema = new mongoose.Schema({
@@ -45,6 +47,10 @@ const playerSchema = new mongoose.Schema({
     scores: {
         type: Array,
         default: []
+    },
+    punished: {
+        type: Boolean,
+        default: false
     }
 });
 

@@ -2,7 +2,6 @@ const mongoose = require('mongoose')
 
 export interface Score {
     playerId: string
-    win: number
     drinks: number
     shots: number
     bb: number
@@ -12,10 +11,6 @@ const scoreSchema = new mongoose.Schema({
     playerId: {
         required: true,
         type: String,
-    },
-    win: {
-        required: true,
-        type: Number,
     },
     drinks: {
         required: true,

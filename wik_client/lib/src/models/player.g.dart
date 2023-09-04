@@ -20,6 +20,7 @@ Player _$PlayerFromJson(Map<String, dynamic> json) => Player(
       scores: (json['scores'] as List<dynamic>)
           .map((e) => Score.fromJson(e as Map<String, dynamic>))
           .toList(),
+      punished: json['punished'] as bool,
     );
 
 Map<String, dynamic> _$PlayerToJson(Player instance) => <String, dynamic>{
@@ -30,4 +31,5 @@ Map<String, dynamic> _$PlayerToJson(Player instance) => <String, dynamic>{
       'drinks': instance.drinks,
       'shots': instance.shots,
       'bb': instance.bb,
+      'punished': instance.punished,
     };

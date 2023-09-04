@@ -1,7 +1,10 @@
 const mongoose = require("mongoose");
 const { betSchema } = require("./bet");
+const { playerSchema } = require('./player');
 const { scoreSchema } = require('./score');
 import { Bet } from "./bet"
+import { Player } from "./player";
+import { Score } from "./score";
 
 export interface Round {
     no: number
@@ -9,7 +12,9 @@ export interface Round {
     turn: Turn
     half: boolean
     punishments: number
+    winners: Player[]
     bets: Bet[]
+    scores: Score[]
 }
 
 export enum Turn {
@@ -42,6 +47,7 @@ const roundSchema = new mongoose.Schema({
         type: Number,
         default: 0
     },
+    winners: [playerSchema],
     bets: [betSchema],
     scores: [scoreSchema],
 });

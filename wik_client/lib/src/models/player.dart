@@ -15,7 +15,7 @@ part 'player.g.dart';
 @JsonSerializable()
 class Player {
   //  Constructor
-  const Player({
+  Player({
     required this.id,
     required this.name,
     required this.socketId,
@@ -25,6 +25,7 @@ class Player {
     required this.bb,
     required this.bets,
     required this.scores,
+    required this.punished,
   });
 
   /// Unique identifier for our player
@@ -37,22 +38,25 @@ class Player {
   final String socketId;
 
   /// A number representing their total number of wins for this player during this game
-  final int wins;
+  int wins;
 
   /// A number representing their total number of drinks for htis player during this game
-  final int drinks;
+  int drinks;
 
   /// A number representing their total number of shots for htis player during this game
-  final int shots;
+  int shots;
 
   /// A number representing their total number of bbs for htis player during this game
-  final int bb;
+  int bb;
 
   /// A list of a player's bets
   final List<Bet> bets;
 
   /// A list of a player's scores
   final List<Score> scores;
+
+  /// A boolean value telling us if the player has submitted a punishment
+  bool punished;
 
   /// Connect the generated [_$PlayerFromJson] function to the `fromJson`
   /// factory.

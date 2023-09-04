@@ -76,7 +76,7 @@ class _ResultsViewState extends ConsumerState<ResultsView> {
     final vm = ref.watch(roomViewModel);
 
     //  Submit our bet
-    vm.submitScores(_room.id, scoresToSubmit);
+    vm.submitScores(_room.id, _player.id, scoresToSubmit);
   }
 
   Widget _buildResults() {

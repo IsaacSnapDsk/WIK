@@ -7,7 +7,7 @@ import 'package:wik_client/src/models/player.dart';
 import 'package:wik_client/src/models/bet.dart';
 import 'package:wik_client/src/views/waiting_view.dart';
 
-const List<String> wagers = <String>['Dranks', 'BeeBee', 'SHOTS'];
+const List<String> wagers = <String>['Drink', 'BB', 'Shot'];
 
 class BettingView extends ConsumerStatefulWidget {
   const BettingView({super.key});
@@ -175,7 +175,7 @@ class _BettingViewState extends ConsumerState<BettingView> {
                   onPressed: () {
                     setState(() {
                       _kill = true;
-                      _wager = "SHOTS";
+                      _wager = "Shot";
                       _amount = 2;
                       print('kill: $_kill, wager: $_wager, amount: $_amount');
                       _onSubmitBet();

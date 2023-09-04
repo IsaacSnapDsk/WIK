@@ -68,6 +68,17 @@ class SocketsService {
     );
   }
 
+  //  Sends a "nextRound" event to our Server
+  void nextRound(String roomId, String gmId) {
+    _client.emit(
+      'nextRound',
+      {
+        'roomId': roomId,
+        'gmId': gmId,
+      },
+    );
+  }
+
   //  Sends a "submitBet" event to our Server
   void submitBet(String roomId, Bet bet) {
     _client.emit(
@@ -113,12 +124,24 @@ class SocketsService {
     );
   }
 
+  /// Sends a "stopPunishing" event to our server
+  void stopPunishing(String roomId, String gmId) {
+    _client.emit(
+      'stopPunishing',
+      {
+        'roomId': roomId,
+        'gmId': gmId,
+      },
+    );
+  }
+
   /// Sends a "submitScores" event to our Server
-  void submitScores(String roomId, List scores) {
+  void submitScores(String roomId, String playerId, List scores) {
     _client.emit(
       'submitScores',
       {
         'roomId': roomId,
+        'playerId': playerId,
         'scores': scores,
       },
     );

@@ -1,38 +1,40 @@
-import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
-import 'package:wik_client/src/models/bet.dart';
 import 'package:wik_client/src/models/player.dart';
 import 'package:wik_client/src/models/round.dart';
 
-class GameMasterBettingView extends StatelessWidget {
-  const GameMasterBettingView({
+class GameMasterResultsView extends StatelessWidget {
+  const GameMasterResultsView({
     required this.round,
     required this.players,
-    required this.onStopBetting,
+    required this.onStopPunishing,
     super.key,
   });
 
   final List<Player> players;
   final Round round;
+  final void Function() onStopPunishing;
 
-  final void Function() onStopBetting;
+  List<Widget> _buildPlayerPunished(Player player) {
+    //  Find the player in the room corresponding to this winner
+    Player? real;
+    for (int i = 0; i < players.length; i++) {
+      if (players[i].id == player.id) {
+        real = players[i];
+        break;
+      }
+    }
 
-  List<Widget> _buildPlayerVoted(Player player) {
-    //  Grab our bets
-    final bets = round.bets;
+    //  Check if our player has punished
+    final punished = real!.punished;
 
-    //  Check if our player has voted
-    final voted =
-        bets.firstWhereOrNull((Bet x) => x.playerId == player.id) != null;
+    //  Our icon depends on if this player punished or not
+    final icon = punished ? Icons.close : Icons.check;
 
-    //  Our icon depends on if this player voted or not
-    final icon = voted ? Icons.check : Icons.close;
+    //  Our color depends on if the player punished or not
+    final color = punished ? Colors.red : Colors.green;
 
-    //  Our color depends on if the player voted or not
-    final color = voted ? Colors.green : Colors.red;
-
-    //  Our text depends on if the player voted or not
-    final text = voted ? "Placed Bet" : "Not Bet";
+    //  Our text depends on if the player punished or not
+    final text = punished ? "Not Placed Punishment" : "Placed Punishment";
 
     //  Return our list of widgets
     return [
@@ -55,7 +57,7 @@ class GameMasterBettingView extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.primary,
         title: const Text(
-          "Betting",
+          "Punishing",
           style: TextStyle(
             color: Colors.white,
           ),
@@ -66,22 +68,22 @@ class GameMasterBettingView extends StatelessWidget {
           padding: const EdgeInsets.all(8.0),
           child: Column(
             children: [
-              const Text("Players are currently betting..."),
-              const Text("Stop betting?"),
+              const Text("Players are currently submitting punishments..."),
+              const Text("Stop punishing?"),
               Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: ElevatedButton(
-                  onPressed: onStopBetting,
-                  child: const Text("Stop Betting"),
+                  onPressed: onStopPunishing,
+                  child: const Text("Stop Punishing"),
                 ),
               ),
               Row(
                 children: [
-                  for (final player in players)
+                  for (final player in round.winners)
                     Column(
                       children: [
                         Text(player.name),
-                        ..._buildPlayerVoted(player),
+                        ..._buildPlayerPunished(player),
                       ],
                     ),
                 ],

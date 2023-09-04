@@ -62,7 +62,7 @@ class RoomViewModel extends ChangeNotifier implements SocketsSubscriber {
     final players = room!.players;
 
     //  Filter out our current player
-    final otherPlayers = players.whereNot((player) => player.id != id).toList();
+    final otherPlayers = players.where((player) => player.id != id).toList();
 
     //  Return em :)
     return otherPlayers;
@@ -124,6 +124,11 @@ class RoomViewModel extends ChangeNotifier implements SocketsSubscriber {
     socketsService.joinRoom(joinId, nickname);
   }
 
+  //  Sends a "nextRound" event to the server
+  void nextRound(String roomId, String gmId) {
+    socketsService.nextRound(roomId, gmId);
+  }
+
   // Sends a "bet" event to the server
   void submitBet(String roomId, Bet bet) {
     //  Tell our sockets service we want to bet
@@ -145,8 +150,13 @@ class RoomViewModel extends ChangeNotifier implements SocketsSubscriber {
     socketsService.stopWaiting(roomId, gmId, kill);
   }
 
+  //  Sends a "stopPunishing" event to the server
+  void stopPunishing(String roomId, String gmId) {
+    socketsService.stopPunishing(roomId, gmId);
+  }
+
   //  Sends a "submitScores" event to the server
-  void submitScores(String roomId, List scores) {
-    socketsService.submitScores(roomId, scores);
+  void submitScores(String roomId, String playerId, List scores) {
+    socketsService.submitScores(roomId, playerId, scores);
   }
 }

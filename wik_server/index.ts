@@ -32,8 +32,9 @@ const url = process.env.MONGO_URL
 //  Replace the <password> query with our actual password to get the real url
 const DB = url.replace("<password>", password)
 
+
 //  Sets the turn from Waiting to Calculating
-const startCalculating = async (room): Promise<Room> => {
+const calculateBets = async (room): Promise<Room> => {
     //  Grab our current round
     const round = room.rounds[room.currentRound]
 
@@ -44,34 +45,56 @@ const startCalculating = async (room): Promise<Room> => {
     const scores = []
 
     //  Grab our round's win
-    const win = round.kill == true
+    console.log('bets', bets)
+
+    //  Our mapping of bet keys to score keys
+    const keyMap = {
+        Drink: 'drinks',
+        Shot: 'shots',
+        BB: 'bb'
+    }
 
     //  Iterate through each vote to compute results
     for (let i = 0; i < bets.length; i++) {
         //  Grab the current bet
         let curr = bets[i]
 
+        //  Our player won if their bet matches the round
+        let win = round.kill === curr.kill
+
         //  Find the player for this bet
-        let playerIdx = room.players.findIndex(x => x.id === curr.playerId)
+        let playerIdx = room.players.findIndex(x => x._id.toString() === curr.playerId)
+
+        //  Convert our type into an actual key of our scores (i.e. Shot to shots)
+        let type = keyMap[curr.type]
 
         //  Create a score for this player based on the win
+        //  We default to 0 for every key, and use our Bet's "type" prop to 
+        //  0 if we got it right, or the bet's "amount" if we got it wrong
         let score = new scoreModel({
             playerId: curr.playerId,
-            win: win ? 1 : 0,
-            drinks: win ? 0 : curr.drinks,
-            shots: win ? 0 : curr.shots,
-            bb: win ? 0 : curr.bb,
+            drinks: 0,
+            shots: 0,
+            bb: 0,
         })
+        score[type] = win ? 0 : curr.amount
+
+        console.log('score before sving', score)
 
         //  add this score to our array
         scores.push(score)
 
         //  Add this score to this player's scores
         room.players[playerIdx].scores.push(score)
+
         //  Add a win to the player if they won this round
         room.players[playerIdx].wins + win ? 1 : 0
-        //  Save our player?
-        room.players[playerIdx].save()
+
+        //  The player's "punished" value depends on if they won or not
+        room.players[playerIdx].punished = win
+
+        //  Also update the round winners if they won
+        if (win) round.winners.push(room.players[playerIdx])
     }
 
     //  Attach our scores to our round
@@ -87,34 +110,75 @@ const startCalculating = async (room): Promise<Room> => {
     return savedRoom
 }
 
-//  Sets the turn from Betting to Waiting
-// const stopVoting = async (room): Promise<Room> => {
-//     //  Grab our current round
-//     const round = room.rounds[room.currentRound]
+const calculateScores = async (room, io): Promise<Room> => {
+    //  Grab our players so we can start processing their scores
+    const players = room.players
+    console.log('pre changes', players)
 
-//     //  Grab the players from our current room
-//     const players = room.players.filter((x: Player) => x.bet)
+    //  Iterate through each player so we can start updating their stats
+    for (let i = 0; i < players.length; i++) {
+        //  Just a ref to the current player
+        let player = players[i]
 
-//     //  Store everyone's vote
-//     const votes = players.map((x: Player) => x.bet)
+        //  Grab their current stats so we can compare states
+        let oldStats = {
+            drinks: player.drinks,
+            shots: player.shots,
+            bb: player.bb
+        }
 
-//     //  Store the votes for the current round
-//     round.votes = votes
+        //  Sum up all of their scores so we can get the new values
+        let newStats = player.scores.reduce((prev, curr) => {
+            return {
+                //  we don't need this to be set but TS is angry
+                playerId: '',
+                drinks: prev.drinks + curr.drinks,
+                shots: prev.shots + curr.shots,
+                bb: prev.bb + curr.bb
+            }
+        })
+        console.log('newStats', newStats)
+        console.log('player', player)
 
-//     //  Change the round's turn to "Betting"
-//     round.turn = Turn.Betting
+        //  Compute the difference so we know the punishment to provide
+        let diff = {
+            drinks: newStats.drinks - oldStats.drinks,
+            shots: newStats.shots - oldStats.shots,
+            bb: newStats.bb - oldStats.bb
+        }
 
-//     //  Update this round in our room
-//     room.rounds[room.currentRound] = round
+        //  We know we haven't changed if our stats if our diff is 0 when summing all props
+        let noChange = Object.values(diff).reduce((a, b) => a + b, 0) === 0
 
-//     //  TODO Save our round
-//     room = await room.save()
+        //  Regardless, we should notify of a punishment (even if they don't need one, we handle that client-side)
+        io.to(player.socketId).emit('punishmentSuccess', { punishment: diff })
 
-//     //  TODO update our round's turn in the DB
-//     //  TODO update our list of rounds in the DB
+        //  If there's no change, then we can just go to the next player
+        if (noChange) continue
 
-//     return room
-// }
+        //  Update our player with the new stats
+        player.drinks = newStats.drinks
+        player.shots = newStats.shots
+        player.bb = newStats.bb
+
+        //  Else, we gotta update their stats (order is important, this way newStats takes priority)
+        // room.players[i] = { ...player, ...newStats }
+        room.players.set(i, player)
+        console.log('room players', room.players)
+    }
+
+    //  Grab our room's current round so we can update the turn we are on
+    const round = room.rounds[room.currentRound]
+    round.turn = 'Final'
+
+    //  Update our round in the room
+    room.rounds[room.currentRound] = round
+
+    //  Now that we're done calculating their new stats, lets save the room to reflect changes
+    const savedRoom = await room.save()
+
+    return savedRoom
+}
 
 const generateSecret = (): String => {
     return crypto.randomBytes(64).toString('hex');
@@ -269,15 +333,17 @@ io.on("connection", (socket) => {
         try {
             //  Grab our current room
             const room = await roomModel.findById(roomId)
+            console.log('room?', room)
 
             //  If it isn't found, return an error
             if (!room) return socket.emit("errorOccurred", "Room not found.")
 
             //  Find the index of the vote for this player
-            const playerIdx = room.players.findIndex((x: Player) => x._id === bet.playerId)
+            const playerIdx = room.players.findIndex((x: Player) => x._id.toString() === bet.playerId)
 
             //  Find the player matching this bet id
             const player = room.players[playerIdx]
+            console.log('player?', playerIdx)
 
             //  If it isn't found, return an error
             if (!player) return socket.emit("errorOccurred", "Player does not exist.")
@@ -303,6 +369,13 @@ io.on("connection", (socket) => {
         }
     })
 
+    /**
+     * This occurs after all players submit bets, we just transition the round to "Waiting"
+     * and notify the client, which will give the GM the ability to make a decision on whether
+     * the clip killed or not.
+     * 
+     * The next event we will handle will be the "stopWaiting" from the GM
+     */
     socket.on("stopBetting", async ({ roomId, gmId }) => {
         try {
             //  Grab our current room
@@ -345,6 +418,14 @@ io.on("connection", (socket) => {
         }
     })
 
+    /**
+ * This occurs after the GM makes a decision on whether the clip killed or not.
+ * This will go through each [Bet] made and create 1 [Score] for the [Player] that the
+ * [Bet] belongs to, and add it to their [Player.scores] array. Each [Score] will determine
+ * the amount for each type ([Score.shots], [Score.drinks], [Score.bb]) based on if the [Bet] was
+ * correct, and the [Bet.amount] property. The [Player.wins] also gets updated based on if the
+ * [Bet] was correct or not.
+ */
     socket.on("stopWaiting", async ({ roomId, gmId, kill }) => {
         try {
             //  Grab our current room
@@ -379,8 +460,40 @@ io.on("connection", (socket) => {
             room.rounds[room.currentRound] = currentRound
 
             //  Calculate
-            const savedRoom = await startCalculating(room)
+            const savedRoom = await calculateBets(room)
 
+            console.log('done calcing')
+            //  Return our new room
+            io.to(roomId).emit("changeTurnSuccess", savedRoom)
+        }
+        catch (e) {
+            console.log(`Error stopping voting ${e}`)
+        }
+    })
+    socket.on("stopPunishing", async ({ roomId, gmId }) => {
+        try {
+            //  Grab our current room
+            const room = await roomModel.findById(roomId)
+
+            //  If it isn't found, return an error
+            if (!room) return socket.emit("errorOccurred", "Room not found.")
+
+            //  Find our game master with this secret
+            const gameMaster = await gameMasterModel.findById(gmId)
+
+            //  If it isn't found, return an error
+            if (!gameMaster) return socket.emit("errorOccurred", "Game Master not found")
+
+            //  Check if this game master belongs to this room
+            const belongs = gameMaster.roomId === roomId
+
+            //  If they dont, return an error
+            if (!belongs) return socket.emit("errorOccurred", "Game Master and Room do not match")
+
+            //  Calculate our punishments and notify players about these changes
+            const savedRoom = await calculateScores(room, io)
+
+            console.log('sus calcing')
             //  Return our new room
             io.to(roomId).emit("changeTurnSuccess", savedRoom)
         }
@@ -389,7 +502,7 @@ io.on("connection", (socket) => {
         }
     })
 
-    socket.on("submitScores", async ({ roomId, scores }) => {
+    socket.on("submitScores", async ({ roomId, playerId, scores }) => {
         try {
             //  Grab our current room
             const room = await roomModel.findById(roomId)
@@ -405,7 +518,7 @@ io.on("connection", (socket) => {
                 round.scores.push(score)
 
                 //  Find the index of the vote for this player
-                const playerIdx = room.players.findIndex((x: Player) => x._id === score.playerId)
+                const playerIdx = room.players.findIndex((x: Player) => x._id.toString() === score.playerId)
 
                 //  Find the player matching this score
                 const player = room.players[playerIdx]
@@ -414,14 +527,29 @@ io.on("connection", (socket) => {
                 player.scores.push(score)
 
                 //  Update our the room and player
-                room.players[playerIdx] = player
+                // room.players[playerIdx] = player
+                room.players.set(playerIdx, player)
             }
 
             //  Update the round for our room
-            room.rounds[room.currentRound] = round
+            // room.rounds[room.currentRound] = round
+            room.rounds.set(room.currentRound, round)
+            console.log('id', playerId)
+
+            //  Find the player who sent this request
+            const socketPlayerIdx = room.players.findIndex((x: Player) => x._id.toString() === playerId)
+            console.log('idx, socketP', socketPlayerIdx)
+
+            //  Update our player who sent this in
+            const socketPlayer = room.players[socketPlayerIdx]
+            socketPlayer.punished = false
+
+            //  Update this player in the room
+            room.players.set(socketPlayerIdx, socketPlayer)
 
             //  Save the changes
-            const savedRoom = room.save()
+            const savedRoom = await room.save()
+            console.log('saved room?', savedRoom)
 
             //  Notify the player
             socket.emit('submitScoresSuccess', savedRoom)
@@ -429,98 +557,47 @@ io.on("connection", (socket) => {
         catch (e) {
             console.log(`Error submitting punishment ${e}`)
         }
-
     })
 
-    // socket.on("startCalculating", async ({ roomId, kill }) => {
-    //     try {
-    //         //  Grab our current room
-    //         const room = await roomModel.findById(roomId)
-
-    //         //  Set the current round's result
-    //         room.kill = kill
-
-    //         //  Start calculating
-    //         const savedRoom = await startCalculating(room)
-
-    //         //  Return our saved room
-    //         io.to(roomId).emit("changeTurnSuccess", savedRoom)
-    //     }
-    //     catch (e) {
-    //         console.log(`Error starting calculating ${e}`)
-    //     }
-    // })
-
-    socket.on("countResults", async ({ roomId }) => {
+    socket.on("nextRound", async ({ roomId, gmId }) => {
         try {
             //  Grab our current room
             const room = await roomModel.findById(roomId)
 
-            //  We should notify every player about their updated score
-            io.to(roomId).emit("countReusltsSuccess", room)
+            //  If it isn't found, return an error
+            if (!room) return socket.emit("errorOccurred", "Room not found.")
 
-            //  Notify the game master as well
-            socket.emit('scoresCountedSuccess', room)
+            //  Find our game master with this secret
+            const gameMaster = await gameMasterModel.findById(gmId)
+
+            //  If it isn't found, return an error
+            if (!gameMaster) return socket.emit("errorOccurred", "Game Master not found")
+
+            //  Check if this game master belongs to this room
+            const belongs = gameMaster.roomId === roomId
+
+            //  If they dont, return an error
+            if (!belongs) return socket.emit("errorOccurred", "Game Master and Room do not match")
+
+            const round = new roundModel({
+                no: room.currentRound + 2,
+                turn: 'Betting',
+                bets: [],
+                scores: [],
+            })
+            room.rounds.push(round)
+            room.currentRound++
+
+            const savedRoom = await room.save()
+
+            console.log('sus calcing')
+            //  Return our new room
+            io.to(roomId).emit("changeTurnSuccess", savedRoom)
         }
         catch (e) {
-            console.log(`Error counting results ${e}`)
+            console.log(`Error changing round ${e}`)
         }
     })
-
-    // socket.on("joinRoom", async ({ nickname, roomId }) => {
-    //     try {
-    //         if (!roomId.match(/^[0-9a-fA-F]{24}$/)) {
-    //             socket.emit("errorOccurred", "Please enter a valid room ID.");
-    //             return;
-    //         }
-    //         let room = await Room.findById(roomId);
-
-    //         if (room.isJoin) {
-    //             let player = {
-    //                 nickname,
-    //                 socketId: socket.id,
-    //                 playerType: "O",
-    //             };
-    //             socket.join(roomId);
-    //             room.players.push(player);
-    //             room.isJoin = false;
-    //             room = await room.save();
-    //             io.to(roomId).emit("joinRoomSuccess", room);
-    //             io.to(roomId).emit("updatePlayers", room.players);
-    //             io.to(roomId).emit("updateRoom", room);
-    //         } else {
-    //             socket.emit(
-    //                 "errorOccurred",
-    //                 "The game is in progress, try again later."
-    //             );
-    //         }
-    //     } catch (e) {
-    //         console.log(e);
-    //     }
-    // });
-
-    // socket.on("tap", async ({ index, roomId }) => {
-    //     try {
-    //         let room = await Room.findById(roomId);
-
-    //         let choice = room.turn.playerType; // x or o
-    //         if (room.turnIndex == 0) {
-    //             room.turn = room.players[1];
-    //             room.turnIndex = 1;
-    //         } else {
-    //             room.turn = room.players[0];
-    //             room.turnIndex = 0;
-    //         }
-    //         room = await room.save();
-    //         io.to(roomId).emit("tapped", {
-    //             index,
-    //             choice,
-    //             room,
-    //         });
-    //     } catch (e) {
-    //         console.log(e);
-    //     }
-    // });
 });
 
 mongoose

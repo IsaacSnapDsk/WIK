@@ -1,5 +1,6 @@
 import 'package:json_annotation/json_annotation.dart';
 import 'package:wik_client/src/models/bet.dart';
+import 'package:wik_client/src/models/player.dart';
 import 'package:wik_client/src/models/score.dart';
 
 //  This is required to generate the JSON conversions
@@ -24,6 +25,7 @@ class Round {
     this.punishments,
     required this.bets,
     required this.scores,
+    required this.winners,
   });
 
   /// Unique identifier for our room
@@ -49,6 +51,9 @@ class Round {
 
   /// A list of a round's scores
   final List<Score> scores;
+
+  /// A list of a round's winners
+  final List<Player> winners;
 
   /// Connect the generated [_$RoundFromJson] function to the `fromJson`
   /// factory.
