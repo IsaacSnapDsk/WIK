@@ -18,11 +18,33 @@ class _WaitingViewState extends ConsumerState<WaitingView> {
     return Center(
       child: Container(
         padding: const EdgeInsets.all(8.0),
-        child: Column(children: [
-          const Text("Your current bet:"),
-          Text(widget.currentBet.kill ? "Kill" : "No Kill"),
-          Text("${widget.currentBet.amount} ${widget.currentBet.type}"),
-        ]),
+        child: Column(
+          children: [
+            Text(
+              "Your current bet:",
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onBackground,
+                fontWeight: FontWeight.bold,
+                fontSize: Theme.of(context).textTheme.headlineSmall!.fontSize,
+              ),
+            ),
+            Text(
+              widget.currentBet.kill ? "Kill" : "No Kill",
+              style: TextStyle(
+                color: widget.currentBet.kill ? Colors.blue : Colors.pink,
+                fontWeight: FontWeight.bold,
+                fontSize: Theme.of(context).textTheme.headlineSmall!.fontSize,
+              ),
+            ),
+            Text(
+              "${widget.currentBet.amount} ${widget.currentBet.type}",
+              style: TextStyle(
+                color: widget.currentBet.kill ? Colors.blue : Colors.pink,
+                fontSize: Theme.of(context).textTheme.headlineSmall!.fontSize,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -7,6 +7,7 @@ import 'package:wik_client/src/models/room.dart';
 import 'package:wik_client/src/models/round.dart';
 import 'package:wik_client/src/models/score.dart';
 import 'package:wik_client/src/services/room_view_model.dart';
+import 'package:wik_client/src/views/wik_appbar.dart';
 
 class PunishmentView extends ConsumerStatefulWidget {
   const PunishmentView({super.key});
@@ -95,20 +96,39 @@ class _PunishmentViewState extends ConsumerState<PunishmentView> {
 
     //  Else return our waiting room
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.primary,
-        title: Text("Waiting Room ID: ${_room.id}"),
-      ),
+      appBar: const WikAppBar(),
       body: Center(
         child: Container(
+          decoration: _needPunishment()
+              ? const BoxDecoration(
+                  image: DecorationImage(
+                    opacity: 0.3,
+                    fit: BoxFit.cover,
+                    image: NetworkImage(
+                        'https://www.mensjournal.com/.image/ar_1:1%2Cc_fill%2Ccs_srgb%2Cfl_progressive%2Cq_auto:good%2Cw_1200/MjAxMDU0Nzk0OTI2NzkzODIx/kevin-james-on-the-king-of-queens.jpg'),
+                  ),
+                )
+              : null,
           padding: const EdgeInsets.all(8.0),
           child: Column(
             children: [
-              Text("Your Punishment for round: ${_room.currentRound + 1}"),
+              Text(
+                "Your Punishment for Round ${_room.currentRound + 1}",
+                style: TextStyle(
+                  color: Colors.pink,
+                  fontSize: Theme.of(context).textTheme.titleLarge!.fontSize,
+                ),
+              ),
               if (_needPunishment())
                 _buildPunishments()
               else
-                Text("None! You got off easy this time fuckass"),
+                Text(
+                  "None! You got off easy this time fuckass",
+                  style: TextStyle(
+                    fontSize:
+                        Theme.of(context).textTheme.displaySmall!.fontSize,
+                  ),
+                ),
             ],
           ),
         ),

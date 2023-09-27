@@ -7,6 +7,9 @@ import 'package:wik_client/src/views/create_room_view.dart';
 import 'package:wik_client/src/views/join_room_view.dart';
 import 'package:wik_client/src/views/room_view.dart';
 import 'package:wik_client/src/views/results_view.dart';
+import 'package:wik_client/src/views/scoreboard_view.dart';
+import 'package:wik_client/src/views/wik_appbar.dart';
+import 'package:wik_client/src/widgets/wik_button.dart';
 
 Future main() async {
   // Load our .env file
@@ -23,7 +26,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.pink),
         useMaterial3: true,
       ),
       home: const MyHomePage(title: 'WILL IT KILL'),
@@ -73,8 +76,8 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
   Widget _buildHomeButtons() {
     //  If we have a room, just return a simple button to take us to our room view
     if (_room != null) {
-      return ElevatedButton(
-        child: const Text("Return to Room"),
+      return WikButton(
+        text: 'Return to Room',
         onPressed: () => Navigator.push(
           context,
           MaterialPageRoute(
@@ -88,8 +91,8 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
       return Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          ElevatedButton(
-            child: const Text("Create a Room"),
+          WikButton(
+            text: 'Create a Room',
             onPressed: () => Navigator.push(
               context,
               MaterialPageRoute(
@@ -99,8 +102,9 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
               ),
             ),
           ),
-          ElevatedButton(
-            child: const Text("Join a Room"),
+          const SizedBox(height: 20),
+          WikButton(
+            text: 'Join a Room',
             onPressed: () => Navigator.push(
               context,
               MaterialPageRoute(
@@ -121,10 +125,7 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
 
     //  Our actual layout
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Text(widget.title),
-      ),
+      appBar: const WikAppBar(),
       body: Center(
         child: Padding(
           padding: const EdgeInsets.all(8.0),

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:wik_client/src/models/player.dart';
 import 'package:wik_client/src/models/round.dart';
+import 'package:wik_client/src/views/wik_appbar.dart';
+import 'package:wik_client/src/widgets/wik_button.dart';
 
 class GameMasterResultsView extends StatelessWidget {
   const GameMasterResultsView({
@@ -31,7 +33,7 @@ class GameMasterResultsView extends StatelessWidget {
     final icon = punished ? Icons.close : Icons.check;
 
     //  Our color depends on if the player punished or not
-    final color = punished ? Colors.red : Colors.green;
+    final color = punished ? Colors.pink : Colors.blueAccent;
 
     //  Our text depends on if the player punished or not
     final text = punished ? "Not Placed Punishment" : "Placed Punishment";
@@ -54,15 +56,7 @@ class GameMasterResultsView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.primary,
-        title: const Text(
-          "Punishing",
-          style: TextStyle(
-            color: Colors.white,
-          ),
-        ),
-      ),
+      appBar: const WikAppBar(text: 'PUNISHING...'),
       body: Center(
         child: Container(
           padding: const EdgeInsets.all(8.0),
@@ -72,9 +66,9 @@ class GameMasterResultsView extends StatelessWidget {
               const Text("Stop punishing?"),
               Padding(
                 padding: const EdgeInsets.all(8.0),
-                child: ElevatedButton(
+                child: WikButton(
                   onPressed: onStopPunishing,
-                  child: const Text("Stop Punishing"),
+                  text: 'Stop Punishing',
                 ),
               ),
               Row(

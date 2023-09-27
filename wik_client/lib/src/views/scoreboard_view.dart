@@ -5,8 +5,11 @@ import 'package:wik_client/src/models/game_master.dart';
 import 'package:wik_client/src/models/player.dart';
 import 'package:wik_client/src/models/room.dart';
 import 'package:wik_client/src/models/round.dart';
-import 'package:wik_client/src/models/score.dart';
 import 'package:wik_client/src/services/room_view_model.dart';
+import 'dart:math' as math;
+
+import 'package:wik_client/src/views/wik_appbar.dart';
+import 'package:wik_client/src/widgets/wik_button.dart';
 
 class ScoreboardView extends ConsumerStatefulWidget {
   const ScoreboardView({super.key});
@@ -35,6 +38,17 @@ class _ScoreboardViewState extends ConsumerState<ScoreboardView> {
     });
   }
 
+  bool _playerIsWinner(Player player) {
+    //  Grab our current round's winners
+    final winners = _round.winners;
+
+    //  Check if our player is in that array
+    final playerWinner = winners.firstWhereOrNull((p) => p.id == player.id);
+
+    //  If playerWinner is null, we did not win
+    return playerWinner != null;
+  }
+
   @override
   Widget build(BuildContext context) {
     //  Listen to our room for changes
@@ -48,51 +62,74 @@ class _ScoreboardViewState extends ConsumerState<ScoreboardView> {
 
     //  Else return our waiting room
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.primary,
-        title: Text("Waiting Room ID: ${_room.id}"),
-      ),
+      appBar: const WikAppBar(),
       body: Center(
         child: Container(
           padding: const EdgeInsets.all(8.0),
           child: Column(
             children: [
-              Text("Total Scores for round ${_room.currentRound + 1}"),
+              Text(
+                "Total Scores for Round ${_room.currentRound + 1}",
+                style: Theme.of(context).textTheme.headlineLarge,
+              ),
               if (_gm != null)
-                ElevatedButton(
+                WikButton(
                   onPressed: () => vm.nextRound(_room.id, _gm!.id),
-                  child: const Text("Next Round"),
+                  text: "Next Round",
                 ),
-              for (final player in _room.players)
-                Column(
-                  children: [
-                    Text(player.name),
-                    Row(
-                      children: [
-                        const Text("Wins: "),
-                        Text(player.wins.toString()),
-                      ],
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  for (final player in _room.players)
+                    Container(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            player.name,
+                            style: TextStyle(
+                              color: _playerIsWinner(player)
+                                  ? Colors.blueAccent
+                                  : Colors.pink,
+                              decoration: TextDecoration.underline,
+                              fontSize: Theme.of(context)
+                                  .textTheme
+                                  .titleLarge!
+                                  .fontSize,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          Row(
+                            children: [
+                              const Text("Wins: "),
+                              Text(player.wins.toString()),
+                            ],
+                          ),
+                          Row(
+                            children: [
+                              const Text("Drinks: "),
+                              Text(player.drinks.toString()),
+                            ],
+                          ),
+                          Row(
+                            children: [
+                              const Text("Shots: "),
+                              Text(player.shots.toString()),
+                            ],
+                          ),
+                          Row(
+                            children: [
+                              const Text("BB: "),
+                              Text(player.bb.toString()),
+                            ],
+                          ),
+                        ],
+                      ),
                     ),
-                    Row(
-                      children: [
-                        const Text("Drinks: "),
-                        Text(player.drinks.toString()),
-                      ],
-                    ),
-                    Row(
-                      children: [
-                        const Text("Shots: "),
-                        Text(player.shots.toString()),
-                      ],
-                    ),
-                    Row(
-                      children: [
-                        const Text("BB: "),
-                        Text(player.bb.toString()),
-                      ],
-                    ),
-                  ],
-                ),
+                  const SizedBox(width: 50),
+                ],
+              ),
             ],
           ),
         ),

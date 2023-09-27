@@ -4,6 +4,8 @@ import 'package:wik_client/src/models/game_master.dart';
 import 'package:wik_client/src/models/room.dart';
 import 'package:wik_client/src/services/room_view_model.dart';
 import 'package:wik_client/src/views/started_room_view.dart';
+import 'package:wik_client/src/views/wik_appbar.dart';
+import 'package:wik_client/src/widgets/wik_button.dart';
 
 class RoomView extends ConsumerStatefulWidget {
   const RoomView({super.key});
@@ -52,24 +54,23 @@ class _RoomViewState extends ConsumerState<RoomView> {
 
     //  Else return our waiting room
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.primary,
-        title: Text("Waiting Room Joinable ID: ${_room.joinId}"),
-      ),
+      appBar: const WikAppBar(text: 'WAITING FOR PLAYERS...'),
       body: Center(
         child: Container(
           padding: const EdgeInsets.all(8.0),
-          child: Column(children: [
-            Text("Here's the join ID: ${_room.joinId}"),
-            Text("You are in room: ${_room.name}"),
-            const Text("Current Players: "),
-            for (final player in _room.players) Text(player.name),
-            if (_gm != null)
-              ElevatedButton(
-                onPressed: () => vm.startGame(_room.id, _gm!.id),
-                child: const Text("Start Game"),
-              ),
-          ]),
+          child: Column(
+            children: [
+              Text("Here's the join ID: ${_room.joinId}"),
+              Text("You are in room: ${_room.name}"),
+              const Text("Current Players: "),
+              for (final player in _room.players) Text(player.name),
+              if (_gm != null)
+                WikButton(
+                  onPressed: () => vm.startGame(_room.id, _gm!.id),
+                  text: 'Start Game',
+                ),
+            ],
+          ),
         ),
       ),
     );

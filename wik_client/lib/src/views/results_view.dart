@@ -6,6 +6,8 @@ import 'package:wik_client/src/models/room.dart';
 import 'package:wik_client/src/models/player.dart';
 import 'package:wik_client/src/models/bet.dart';
 import 'package:wik_client/src/models/score.dart';
+import 'package:wik_client/src/views/wik_appbar.dart';
+import 'package:wik_client/src/widgets/wik_button.dart';
 
 class ResultsView extends ConsumerStatefulWidget {
   const ResultsView({super.key});
@@ -90,19 +92,26 @@ class _ResultsViewState extends ConsumerState<ResultsView> {
       }
     }
 
+    // TODO move this somewhere else
     _win = _room.rounds[_room.currentRound].kill! == _currentBet.kill;
 
     if (_win) {
-      return Column(children: [
-        Text("You won! You get give ${_currentBet.amount} ${_currentBet.type}"),
-        Column(children: [
-          const Text("Select who you want to punish:"),
-          for (var player in _otherPlayers) _punshmentSelection(player),
-          ElevatedButton(
-              onPressed: () => _canSubmit ? _onSubmitPunishments() : null,
-              child: const Text("Submit Punishment")),
-        ]),
-      ]);
+      return Column(
+        children: [
+          Text(
+              "You won! You get to give ${_currentBet.amount} ${_currentBet.type}${_currentBet.amount > 1 ? 's' : ''}"),
+          Column(
+            children: [
+              const Text("Select who you want to punish:"),
+              for (var player in _otherPlayers) _punshmentSelection(player),
+              WikButton(
+                onPressed: () => _canSubmit ? _onSubmitPunishments() : null,
+                text: "Submit Punishment",
+              ),
+            ],
+          ),
+        ],
+      );
     } else {
       return const Text("You lost!");
     }
@@ -135,18 +144,24 @@ class _ResultsViewState extends ConsumerState<ResultsView> {
     _otherPlayers = ref.watch(roomViewModel).otherPlayers();
 
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.primary,
-        title: const Text("Results"),
-      ),
+      appBar: const WikAppBar(text: 'RESULTS...'),
       body: Center(
         child: Container(
-            width: 300,
+            width: 400,
             padding: const EdgeInsets.all(8.0),
             child: Column(children: [
-              const Text("Your current bet:"),
               Text(
-                  'The clip was: ${_room.rounds[_room.currentRound].kill! ? "Kill" : "No Kill"}'),
+                "Your current bet:",
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: Theme.of(context).textTheme.displaySmall!.fontSize,
+                ),
+              ),
+              Text(
+                  'The clip was: ${_room.rounds[_room.currentRound].kill! ? "Kill" : "No Kill"}',
+                  style: TextStyle(
+                    color: _win ? Colors.blueAccent : Colors.pink,
+                  )),
               _buildResults(),
             ])),
       ),

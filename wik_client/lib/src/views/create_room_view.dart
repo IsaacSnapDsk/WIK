@@ -4,6 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:wik_client/src/models/room.dart';
 import 'package:wik_client/src/services/room_view_model.dart';
 import 'package:wik_client/src/views/room_view.dart';
+import 'package:wik_client/src/views/wik_appbar.dart';
+import 'package:wik_client/src/widgets/wik_button.dart';
 
 class CreateRoomView extends ConsumerStatefulWidget {
   const CreateRoomView({super.key});
@@ -44,10 +46,7 @@ class _CreateRoomViewState extends ConsumerState<CreateRoomView> {
   /// Builds our page for when there is NOT a room
   Widget _buildInitialState() {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.primary,
-        title: const Text("Create a Room"),
-      ),
+      appBar: const WikAppBar(text: 'CREATE A ROOM...'),
       body: Center(
         child: Container(
           width: 300,
@@ -72,18 +71,10 @@ class _CreateRoomViewState extends ConsumerState<CreateRoomView> {
               const SizedBox(
                 height: 25,
               ),
-              ElevatedButton(
-                style: const ButtonStyle(
-                  backgroundColor: MaterialStatePropertyAll(
-                    Colors.blue,
-                  ),
-                  foregroundColor: MaterialStatePropertyAll(
-                    Colors.white,
-                  ),
-                ),
-                child: const Text("Create Room"),
+              WikButton(
                 onPressed: () =>
                     _canSubmit ? vm.createRoom(_roomName!, _maxRounds!) : null,
+                text: 'Create Room',
               ),
             ],
           ),

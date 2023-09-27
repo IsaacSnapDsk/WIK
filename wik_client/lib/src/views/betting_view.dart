@@ -6,6 +6,8 @@ import 'package:wik_client/src/models/room.dart';
 import 'package:wik_client/src/models/player.dart';
 import 'package:wik_client/src/models/bet.dart';
 import 'package:wik_client/src/views/waiting_view.dart';
+import 'package:wik_client/src/views/wik_appbar.dart';
+import 'package:wik_client/src/widgets/wik_button.dart';
 
 const List<String> wagers = <String>['Drink', 'BB', 'Shot'];
 
@@ -28,6 +30,9 @@ class _BettingViewState extends ConsumerState<BettingView> {
 
   /// Determines if we can submit the form or not
   bool _canSubmit = false;
+
+  /// Determines if we have selected rock or not
+  bool _rock = false;
 
   /// Local room instance
   late Room _room;
@@ -116,44 +121,30 @@ class _BettingViewState extends ConsumerState<BettingView> {
       return Column(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
-          const Text("Will it KILL?"),
+          Text(
+            "Will It KILL?",
+            style: Theme.of(context).textTheme.headlineLarge,
+          ),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              ElevatedButton(
-                style: const ButtonStyle(
-                  backgroundColor: MaterialStatePropertyAll(
-                    Colors.red,
-                  ),
-                  foregroundColor: MaterialStatePropertyAll(
-                    Colors.white,
-                  ),
-                ),
-                child: const Text("YES"),
-                onPressed: () {
-                  setState(() {
-                    _kill = true;
-                    print('kill: $_kill');
-                  });
-                },
-              ),
-              ElevatedButton(
-                style: const ButtonStyle(
-                  backgroundColor: MaterialStatePropertyAll(
-                    Colors.blue,
-                  ),
-                  foregroundColor: MaterialStatePropertyAll(
-                    Colors.white,
-                  ),
-                ),
-                child: const Text("NO"),
-                onPressed: () {
-                  setState(() {
-                    _kill = false;
-                    print('kill: $_kill');
-                  });
-                },
-              ),
+              WikButton(
+                  onPressed: () {
+                    setState(() {
+                      _kill = true;
+                      print('kill: $_kill');
+                    });
+                  },
+                  color: Colors.blueAccent,
+                  text: 'YES'),
+              WikButton(
+                  onPressed: () {
+                    setState(() {
+                      _kill = false;
+                      print('kill: $_kill');
+                    });
+                  },
+                  text: 'NO'),
             ],
           ),
           SizedBox(
@@ -174,9 +165,11 @@ class _BettingViewState extends ConsumerState<BettingView> {
                   icon: const Icon(Icons.do_not_touch),
                   onPressed: () {
                     setState(() {
+                      //  TODO this needs to be actual max bet idk how to figure it out tho
                       _kill = true;
                       _wager = "Shot";
                       _amount = 2;
+                      _rock = true;
                       print('kill: $_kill, wager: $_wager, amount: $_amount');
                       _onSubmitBet();
                     });
@@ -190,7 +183,7 @@ class _BettingViewState extends ConsumerState<BettingView> {
 
       /// If the client does not have the current bet and the player has
       /// chosen kill, show the type and amount
-    } else {
+    } else if (!_rock) {
       return Column(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
@@ -220,16 +213,8 @@ class _BettingViewState extends ConsumerState<BettingView> {
             ],
             onChanged: _onAmountChanged,
           ),
-          ElevatedButton(
-            style: const ButtonStyle(
-              backgroundColor: MaterialStatePropertyAll(
-                Colors.blue,
-              ),
-              foregroundColor: MaterialStatePropertyAll(
-                Colors.white,
-              ),
-            ),
-            child: const Text("Submit Bet"),
+          WikButton(
+            text: 'Submit Bet',
             onPressed: () {
               if (_canSubmit) {
                 print('kill: $_kill, wager: $_wager, amount: $_amount');
@@ -241,6 +226,8 @@ class _BettingViewState extends ConsumerState<BettingView> {
           ),
         ],
       );
+    } else {
+      return Container();
     }
   }
 
@@ -249,10 +236,7 @@ class _BettingViewState extends ConsumerState<BettingView> {
     //  Load our view model
     // final vm = ref.watch(roomViewModel);
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.primary,
-        title: const Text("Betting"),
-      ),
+      appBar: const WikAppBar(text: 'BETTING...'),
       body: Center(
         child: Container(
             width: 300,

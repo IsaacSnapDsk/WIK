@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:wik_client/src/views/wik_appbar.dart';
+import 'package:wik_client/src/widgets/wik_button.dart';
 
 class GameMasterWaitingView extends StatelessWidget {
   const GameMasterWaitingView({
@@ -11,19 +13,12 @@ class GameMasterWaitingView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.primary,
-        title: const Text(
-          "Waiting",
-          style: TextStyle(
-            color: Colors.white,
-          ),
-        ),
-      ),
+      appBar: const WikAppBar(text: 'WAITING...'),
       body: Center(
         child: Container(
           padding: const EdgeInsets.all(8.0),
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               const Text(
                 "Did the clip kill?",
@@ -32,18 +27,17 @@ class GameMasterWaitingView extends StatelessWidget {
                 ),
               ),
               Row(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  ElevatedButton(
-                    style: const ButtonStyle(
-                      backgroundColor: MaterialStatePropertyAll(Colors.red),
-                      foregroundColor: MaterialStatePropertyAll(Colors.black),
-                    ),
-                    onPressed: () => onStopWaiting(false),
-                    child: const Text("No"),
-                  ),
-                  ElevatedButton(
+                  WikButton(
                     onPressed: () => onStopWaiting(true),
-                    child: const Text("Yes"),
+                    text: 'Yes',
+                    color: Colors.blueAccent,
+                  ),
+                  const SizedBox(width: 30),
+                  WikButton(
+                    onPressed: () => onStopWaiting(false),
+                    text: 'No',
                   ),
                 ],
               )

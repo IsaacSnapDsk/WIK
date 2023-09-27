@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:wik_client/src/models/room.dart';
 import 'package:wik_client/src/services/room_view_model.dart';
 import 'package:wik_client/src/views/room_view.dart';
+import 'package:wik_client/src/views/wik_appbar.dart';
+import 'package:wik_client/src/widgets/wik_button.dart';
 
 class JoinRoomView extends ConsumerStatefulWidget {
   const JoinRoomView({super.key});
@@ -41,12 +43,8 @@ class _JoinRoomViewState extends ConsumerState<JoinRoomView> {
   }
 
   Widget _buildInitialState() {
-    print("hi");
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.primary,
-        title: const Text("Join Room"),
-      ),
+      appBar: const WikAppBar(text: 'JOIN ROOM...'),
       body: Center(
         child: Container(
           width: 300,
@@ -68,18 +66,10 @@ class _JoinRoomViewState extends ConsumerState<JoinRoomView> {
               const SizedBox(
                 height: 25,
               ),
-              ElevatedButton(
-                style: const ButtonStyle(
-                  backgroundColor: MaterialStatePropertyAll(
-                    Colors.blue,
-                  ),
-                  foregroundColor: MaterialStatePropertyAll(
-                    Colors.white,
-                  ),
-                ),
-                child: const Text("Join Room"),
+              WikButton(
                 onPressed: () =>
                     _canSubmit ? vm.joinRoom(_joinId!, _nickname!) : null,
+                text: 'Join Room',
               ),
             ],
           ),

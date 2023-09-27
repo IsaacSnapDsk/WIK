@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:wik_client/src/models/bet.dart';
 import 'package:wik_client/src/models/player.dart';
 import 'package:wik_client/src/models/round.dart';
+import 'package:wik_client/src/views/wik_appbar.dart';
+import 'package:wik_client/src/widgets/wik_button.dart';
 
 class GameMasterBettingView extends StatelessWidget {
   const GameMasterBettingView({
@@ -29,7 +31,7 @@ class GameMasterBettingView extends StatelessWidget {
     final icon = voted ? Icons.check : Icons.close;
 
     //  Our color depends on if the player voted or not
-    final color = voted ? Colors.green : Colors.red;
+    final color = voted ? Colors.blueAccent : Colors.pink;
 
     //  Our text depends on if the player voted or not
     final text = voted ? "Placed Bet" : "Not Bet";
@@ -49,40 +51,48 @@ class GameMasterBettingView extends StatelessWidget {
     ];
   }
 
+  bool _canSubmit() {
+    //  Check if all our players have voted by seeing if everyone voted
+    final allVoted = round.bets.length == players.length;
+
+    return allVoted;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.primary,
-        title: const Text(
-          "Betting",
-          style: TextStyle(
-            color: Colors.white,
-          ),
-        ),
-      ),
+      appBar: const WikAppBar(text: 'BETTING...'),
       body: Center(
         child: Container(
           padding: const EdgeInsets.all(8.0),
           child: Column(
             children: [
-              const Text("Players are currently betting..."),
-              const Text("Stop betting?"),
+              Text(
+                "Players are currently betting...",
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
               Padding(
                 padding: const EdgeInsets.all(8.0),
-                child: ElevatedButton(
-                  onPressed: onStopBetting,
-                  child: const Text("Stop Betting"),
+                child: WikButton(
+                  onPressed: _canSubmit() ? onStopBetting : null,
+                  text: 'Stop Betting?',
                 ),
               ),
               Row(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   for (final player in players)
-                    Column(
-                      children: [
-                        Text(player.name),
-                        ..._buildPlayerVoted(player),
-                      ],
+                    Container(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Column(
+                        children: [
+                          Text(
+                            player.name,
+                            style: Theme.of(context).textTheme.titleMedium,
+                          ),
+                          ..._buildPlayerVoted(player),
+                        ],
+                      ),
                     ),
                 ],
               )
