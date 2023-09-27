@@ -142,6 +142,7 @@ const calculateScores = async (room, io): Promise<Room> => {
 
         //  Compute the difference so we know the punishment to provide
         let diff = {
+            playerId: player.id,
             drinks: newStats.drinks - oldStats.drinks,
             shots: newStats.shots - oldStats.shots,
             bb: newStats.bb - oldStats.bb
@@ -151,7 +152,7 @@ const calculateScores = async (room, io): Promise<Room> => {
         let noChange = Object.values(diff).reduce((a, b) => a + b, 0) === 0
 
         //  Regardless, we should notify of a punishment (even if they don't need one, we handle that client-side)
-        io.to(player.socketId).emit('punishmentSuccess', { punishment: diff })
+        io.to(player.socketId).emit('punishmentSuccess', diff)
 
         //  If there's no change, then we can just go to the next player
         if (noChange) continue

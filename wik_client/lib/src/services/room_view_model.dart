@@ -5,6 +5,7 @@ import 'package:wik_client/src/models/game_master.dart';
 import 'package:wik_client/src/models/player.dart';
 import 'package:wik_client/src/models/room.dart';
 import 'package:wik_client/src/models/bet.dart';
+import 'package:wik_client/src/models/score.dart';
 import 'package:wik_client/src/services/sockets_service.dart';
 import 'package:wik_client/src/services/sockets_subscriber.dart';
 
@@ -39,6 +40,9 @@ class RoomViewModel extends ChangeNotifier implements SocketsSubscriber {
   /// Keeps track of our current game master
   GameMaster? gameMaster;
 
+  /// Keeps track of our current punishment
+  Score? currentPunishment;
+
   /// Initialize the state
   void init() => refresh();
 
@@ -48,6 +52,7 @@ class RoomViewModel extends ChangeNotifier implements SocketsSubscriber {
     room = socketsService.room;
     player = socketsService.player;
     gameMaster = socketsService.gameMaster;
+    currentPunishment = socketsService.currentPunishment;
 
     //  Notify all listeners
     notifyListeners();
@@ -105,9 +110,13 @@ class RoomViewModel extends ChangeNotifier implements SocketsSubscriber {
     socketsService.betSuccessListener(context);
   }
 
-  //  Subscribe to the "subscribeTBetSuccess" listener
-  void subscribeToPunishmentSuccess(BuildContext context) {
+  //  Subscribe to the "subscribeToSubmitScoresSuccess" listener
+  void subscribeToSubmitScoresSuccess(BuildContext context) {
     socketsService.submitScoresSuccessListener(context);
+  }
+
+  void subscribeToPunishmentSuccess(BuildContext context) {
+    socketsService.punishmentSuccessListener(context);
   }
 
   /// EVENTS
@@ -126,6 +135,10 @@ class RoomViewModel extends ChangeNotifier implements SocketsSubscriber {
 
   //  Sends a "nextRound" event to the server
   void nextRound(String roomId, String gmId) {
+    //  This only ever gets fired when going from Final to Bettiner
+    //  so we should reset our current punishment to null
+    currentPunishment = null;
+    notifyListeners();
     socketsService.nextRound(roomId, gmId);
   }
 

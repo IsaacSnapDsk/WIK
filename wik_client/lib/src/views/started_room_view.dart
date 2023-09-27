@@ -7,6 +7,7 @@ import 'package:wik_client/src/views/betting_view.dart';
 import 'package:wik_client/src/views/game_master_betting_view.dart';
 import 'package:wik_client/src/views/game_master_results_view.dart';
 import 'package:wik_client/src/views/game_master_waiting_view.dart';
+import 'package:wik_client/src/views/punishment_view.dart';
 import 'package:wik_client/src/views/results_view.dart';
 import 'package:wik_client/src/views/scoreboard_view.dart';
 
@@ -36,6 +37,9 @@ class _StartedRoomViewState extends ConsumerState<StartedRoomView> {
       vm.subscribeToBetSuccess(context);
 
       //  Subscribe to turn change events
+      vm.subscribeToSubmitScoresSuccess(context);
+
+      //  Subscribe to punishment success events
       vm.subscribeToPunishmentSuccess(context);
     });
   }
@@ -115,7 +119,7 @@ class _StartedRoomViewState extends ConsumerState<StartedRoomView> {
       case 'Results':
         return const ResultsView();
       case 'Final':
-        return const ScoreboardView();
+        return const PunishmentView();
       default:
         return _buildPlaceholder();
     }

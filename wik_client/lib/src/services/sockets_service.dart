@@ -5,6 +5,7 @@ import 'package:wik_client/src/models/room.dart';
 import 'package:wik_client/src/models/game_master.dart';
 import 'package:wik_client/src/models/player.dart';
 import 'package:wik_client/src/models/bet.dart';
+import 'package:wik_client/src/models/score.dart';
 import 'package:wik_client/src/services/sockets_client.dart';
 import 'package:wik_client/src/services/sockets_subscriber.dart';
 
@@ -23,6 +24,7 @@ class SocketsService {
   Room? _room;
   Player? _player;
   GameMaster? _gameMaster;
+  Score? _currentPunishment;
 
   /// A list of our subscribers to listen to our events
   static List<SocketsSubscriber> subscribers = [];
@@ -36,6 +38,7 @@ class SocketsService {
   Room? get room => _room;
   Player? get player => _player;
   GameMaster? get gameMaster => _gameMaster;
+  Score? get currentPunishment => _currentPunishment;
 
   void notifySubscribers() {
     //  Iterate through each subscriber and tell them to refresh
@@ -70,6 +73,7 @@ class SocketsService {
 
   //  Sends a "nextRound" event to our Server
   void nextRound(String roomId, String gmId) {
+    _currentPunishment = null;
     _client.emit(
       'nextRound',
       {
@@ -231,6 +235,16 @@ class SocketsService {
     _client.on('submitScoresSuccess', (response) {
       //  Convert our players into players
       _room = Room.fromJson(response);
+
+      //  Tell our subscribers to refresh
+      notifySubscribers();
+    });
+  }
+
+  void punishmentSuccessListener(BuildContext context) {
+    _client.on('punishmentSuccess', (response) {
+      //  Set our current punishment
+      _currentPunishment = Score.fromJson(response);
 
       //  Tell our subscribers to refresh
       notifySubscribers();
