@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -37,6 +38,9 @@ class _ResultsViewState extends ConsumerState<ResultsView> {
 
   /// Determines if the player won or not
   bool _win = false;
+
+  /// Determines if we have submitted or not
+  bool _scoreSubmitted = false;
 
   //Calculates if the player can submit their bet
   void _calcCanSubmit() {
@@ -79,42 +83,100 @@ class _ResultsViewState extends ConsumerState<ResultsView> {
 
     //  Submit our bet
     vm.submitScores(_room.id, _player.id, scoresToSubmit);
+
+    //  We've submitted so lets change our screen
+    _scoreSubmitted = true;
+  }
+
+  Widget _buildLoss() {
+    /// TODO make this meaner
+    return const Text("You lost!");
   }
 
   Widget _buildResults() {
-    /// Find the player's current bet from the list of bets
+    //  If we have submitted, just return a success message
+    if (_scoreSubmitted) return _buildSuccess();
+
+    //  We can give them a nice layout
+    return Column(
+      children: [
+        Text(
+            "You won! You get to give ${_currentBet.amount} ${_currentBet.type}${_currentBet.amount > 1 ? 's' : ''}"),
+        Column(
+          children: [
+            const Text("Select who you want to punish:"),
+            for (var player in _otherPlayers) _punshmentSelection(player),
+            WikButton(
+              onPressed: () => _canSubmit ? _onSubmitPunishments() : null,
+              text: "Submit Punishment",
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSuccess() {
+    //  Get the players we are fucking up
+    final players = _otherPlayers.where((x) => _scores.containsKey(x.id));
+
+    return Center(
+      child: Container(
+        padding: const EdgeInsets.all(8.0),
+        child: Column(
+          children: [
+            Text(
+              "Yor current punishments:",
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onBackground,
+                fontWeight: FontWeight.bold,
+                fontSize: Theme.of(context).textTheme.headlineSmall!.fontSize,
+              ),
+            ),
+            for (Player player in players)
+              Column(
+                children: [
+                  Text(
+                    player.name,
+                    style: TextStyle(
+                      color: Colors.blueAccent,
+                      fontWeight: FontWeight.bold,
+                      fontSize:
+                          Theme.of(context).textTheme.headlineSmall!.fontSize,
+                    ),
+                  ),
+                  Text(
+                    "${_scores[player.id]} ${_currentBet.type}",
+                    style: TextStyle(
+                      color: Colors.blueAccent,
+                      fontSize:
+                          Theme.of(context).textTheme.headlineSmall!.fontSize,
+                    ),
+                  ),
+                ],
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Bet? _getCurrentBet() {
+    // Find the player's current bet from the list of bets
     /// in the current round
     final bets = _room.rounds[_room.currentRound].bets;
+
+    //  Iterate through each bet to find our current one
     for (final bet in bets) {
+      //  Once our bet is found that matches our current player, return it
       if (bet.playerId == _player.id) {
-        _currentBet = bet;
-        break;
+        return bet;
       }
     }
 
-    // TODO move this somewhere else
-    _win = _room.rounds[_room.currentRound].kill! == _currentBet.kill;
-
-    if (_win) {
-      return Column(
-        children: [
-          Text(
-              "You won! You get to give ${_currentBet.amount} ${_currentBet.type}${_currentBet.amount > 1 ? 's' : ''}"),
-          Column(
-            children: [
-              const Text("Select who you want to punish:"),
-              for (var player in _otherPlayers) _punshmentSelection(player),
-              WikButton(
-                onPressed: () => _canSubmit ? _onSubmitPunishments() : null,
-                text: "Submit Punishment",
-              ),
-            ],
-          ),
-        ],
-      );
-    } else {
-      return const Text("You lost!");
-    }
+    //  If we somehow get down here, return null
+    //  Theoretically, should never happen
+    return null;
   }
 
   Widget _punshmentSelection(Player player) {
@@ -143,13 +205,20 @@ class _ResultsViewState extends ConsumerState<ResultsView> {
     _player = ref.watch(roomViewModel).player!;
     _otherPlayers = ref.watch(roomViewModel).otherPlayers();
 
+    //  Find our current bet from the list of bets in the round
+    _currentBet = _getCurrentBet()!;
+
+    //  We won if our current bet matches the current round's bet
+    _win = _room.rounds[_room.currentRound].kill! == _currentBet.kill;
+
     return Scaffold(
       appBar: const WikAppBar(text: 'RESULTS...'),
       body: Center(
         child: Container(
-            width: 400,
-            padding: const EdgeInsets.all(8.0),
-            child: Column(children: [
+          width: 400,
+          padding: const EdgeInsets.all(8.0),
+          child: Column(
+            children: [
               Text(
                 "Your current bet:",
                 style: TextStyle(
@@ -158,12 +227,15 @@ class _ResultsViewState extends ConsumerState<ResultsView> {
                 ),
               ),
               Text(
-                  'The clip was: ${_room.rounds[_room.currentRound].kill! ? "Kill" : "No Kill"}',
-                  style: TextStyle(
-                    color: _win ? Colors.blueAccent : Colors.pink,
-                  )),
-              _buildResults(),
-            ])),
+                'The clip was: ${_room.rounds[_room.currentRound].kill! ? "Kill" : "No Kill"}',
+                style: TextStyle(
+                  color: _win ? Colors.blueAccent : Colors.pink,
+                ),
+              ),
+              if (!_win) _buildLoss() else _buildResults(),
+            ],
+          ),
+        ),
       ),
     );
   }

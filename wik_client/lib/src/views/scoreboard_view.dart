@@ -49,6 +49,38 @@ class _ScoreboardViewState extends ConsumerState<ScoreboardView> {
     return playerWinner != null;
   }
 
+  Color _textColor(int amt, String key, String playerId) {
+    //  If we are in round 1 AND our amt is > 0, return pink
+    if (_room.currentRound == 0) {
+      if (amt > 0) {
+        return Colors.pink;
+      } else {
+        return Colors.black;
+      }
+    }
+
+    //  Get the previous round
+    final prevRound = _room.rounds[_room.currentRound - 1];
+
+    //  Grab the score from the previous round based player id
+    final prevScore =
+        prevRound.scores.firstWhereOrNull((x) => x.playerId == playerId);
+
+    //  Grab the amount based on key
+    final prevAmt = switch (key) {
+      'drinks' => prevScore!.drinks,
+      'shots' => prevScore!.shots,
+      'bb' => prevScore!.bb,
+      _ => 0,
+    };
+
+    //  If our current is greater than the previous, make it pink
+    if (amt > prevAmt) return Colors.pink;
+
+    //  Else, just return black
+    return Colors.black;
+  }
+
   @override
   Widget build(BuildContext context) {
     //  Listen to our room for changes
@@ -102,26 +134,75 @@ class _ScoreboardViewState extends ConsumerState<ScoreboardView> {
                           ),
                           Row(
                             children: [
-                              const Text("Wins: "),
-                              Text(player.wins.toString()),
+                              const Text(
+                                "Wins: ",
+                                style: TextStyle(
+                                  fontSize: 20,
+                                ),
+                              ),
+                              Text(
+                                player.wins.toString(),
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 20,
+                                ),
+                              ),
                             ],
                           ),
                           Row(
                             children: [
-                              const Text("Drinks: "),
-                              Text(player.drinks.toString()),
+                              const Text(
+                                "Drinks: ",
+                                style: TextStyle(
+                                  fontSize: 20,
+                                ),
+                              ),
+                              Text(
+                                player.drinks.toString(),
+                                style: TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                  color: _textColor(
+                                      player.drinks, 'drinks', player.id),
+                                ),
+                              ),
                             ],
                           ),
                           Row(
                             children: [
-                              const Text("Shots: "),
-                              Text(player.shots.toString()),
+                              const Text(
+                                "Shots: ",
+                                style: TextStyle(
+                                  fontSize: 20,
+                                ),
+                              ),
+                              Text(
+                                player.shots.toString(),
+                                style: TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                  color: _textColor(
+                                      player.shots, 'shots', player.id),
+                                ),
+                              ),
                             ],
                           ),
                           Row(
                             children: [
-                              const Text("BB: "),
-                              Text(player.bb.toString()),
+                              const Text(
+                                "BB: ",
+                                style: TextStyle(
+                                  fontSize: 20,
+                                ),
+                              ),
+                              Text(
+                                player.bb.toString(),
+                                style: TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                  color: _textColor(player.bb, 'bb', player.id),
+                                ),
+                              ),
                             ],
                           ),
                         ],

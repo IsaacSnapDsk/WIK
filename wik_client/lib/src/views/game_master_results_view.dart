@@ -53,6 +53,20 @@ class GameMasterResultsView extends StatelessWidget {
     ];
   }
 
+  Widget _buildLosers(BuildContext context) {
+    return Column(
+      children: [
+        Text(
+          "Damn...no one won???",
+          style: TextStyle(
+            fontSize: Theme.of(context).textTheme.titleLarge!.fontSize,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -60,10 +74,23 @@ class GameMasterResultsView extends StatelessWidget {
       body: Center(
         child: Container(
           padding: const EdgeInsets.all(8.0),
+          decoration: round.winners.isEmpty
+              ? const BoxDecoration(
+                  image: DecorationImage(
+                    repeat: ImageRepeat.repeat,
+                    opacity: 0.2,
+                    image: NetworkImage(
+                        'https://i.kym-cdn.com/entries/icons/original/000/038/646/E_HXiZqX0Ac2UyZ.jpg'),
+                  ),
+                )
+              : null,
           child: Column(
             children: [
-              const Text("Players are currently submitting punishments..."),
-              const Text("Stop punishing?"),
+              Text(
+                "Players are currently submitting punishments...",
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
+              if (round.winners.isEmpty) _buildLosers(context),
               Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: WikButton(
@@ -72,13 +99,20 @@ class GameMasterResultsView extends StatelessWidget {
                 ),
               ),
               Row(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   for (final player in round.winners)
-                    Column(
-                      children: [
-                        Text(player.name),
-                        ..._buildPlayerPunished(player),
-                      ],
+                    Container(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Column(
+                        children: [
+                          Text(
+                            player.name,
+                            style: Theme.of(context).textTheme.titleMedium,
+                          ),
+                          ..._buildPlayerPunished(player),
+                        ],
+                      ),
                     ),
                 ],
               )

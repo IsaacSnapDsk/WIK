@@ -41,24 +41,85 @@ class _PunishmentViewState extends ConsumerState<PunishmentView> {
   Widget _buildPunishments() {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Text("Try better next time :/"),
         Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            const Text("Drinks: "),
-            Text(_currentPunishment!.drinks.toString()),
+            Text(
+              "Drinks: ",
+              style: TextStyle(
+                fontSize: Theme.of(context).textTheme.headlineLarge!.fontSize,
+                fontWeight: FontWeight.bold,
+                color: _currentPunishment!.drinks > 0
+                    ? Colors.blueAccent
+                    : Colors.black,
+              ),
+            ),
+            Text(
+              _currentPunishment!.drinks.toString(),
+              style: TextStyle(
+                fontSize: Theme.of(context).textTheme.headlineLarge!.fontSize,
+                fontWeight: FontWeight.bold,
+                color: _currentPunishment!.drinks > 0
+                    ? Colors.blueAccent
+                    : Colors.black,
+              ),
+            ),
           ],
         ),
         Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            const Text("Shots: "),
-            Text(_currentPunishment!.shots.toString()),
+            Text(
+              "Shots: ",
+              style: TextStyle(
+                fontSize: Theme.of(context).textTheme.headlineLarge!.fontSize,
+                fontWeight: FontWeight.bold,
+                color: _currentPunishment!.shots > 0
+                    ? Colors.blueAccent
+                    : Colors.black,
+              ),
+            ),
+            Text(
+              _currentPunishment!.shots.toString(),
+              style: TextStyle(
+                fontSize: Theme.of(context).textTheme.headlineLarge!.fontSize,
+                fontWeight: FontWeight.bold,
+                color: _currentPunishment!.shots > 0
+                    ? Colors.blueAccent
+                    : Colors.black,
+              ),
+            ),
           ],
         ),
         Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            const Text("BB: "),
-            Text(_currentPunishment!.bb.toString()),
+            Text(
+              "BB: ",
+              style: TextStyle(
+                fontSize: Theme.of(context).textTheme.headlineLarge!.fontSize,
+                fontWeight: FontWeight.bold,
+                color: _currentPunishment!.bb > 0
+                    ? Colors.blueAccent
+                    : Colors.black,
+              ),
+            ),
+            Text(
+              _currentPunishment!.bb.toString(),
+              style: TextStyle(
+                fontSize: Theme.of(context).textTheme.headlineLarge!.fontSize,
+                fontWeight: FontWeight.bold,
+                color: _currentPunishment!.bb > 0
+                    ? Colors.blueAccent
+                    : Colors.black,
+              ),
+            ),
           ],
         ),
       ],
@@ -111,6 +172,7 @@ class _PunishmentViewState extends ConsumerState<PunishmentView> {
               : null,
           padding: const EdgeInsets.all(8.0),
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Text(
                 "Your Punishment for Round ${_room.currentRound + 1}",
