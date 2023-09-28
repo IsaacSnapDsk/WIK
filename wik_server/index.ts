@@ -553,7 +553,7 @@ io.on("connection", (socket) => {
             console.log('saved room?', savedRoom)
 
             //  Notify the player
-            socket.emit('submitScoresSuccess', savedRoom)
+            io.to(roomId).emit('submitScoresSuccess', savedRoom)
         }
         catch (e) {
             console.log(`Error submitting punishment ${e}`)
