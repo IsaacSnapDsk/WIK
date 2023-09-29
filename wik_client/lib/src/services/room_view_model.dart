@@ -157,6 +157,11 @@ class RoomViewModel extends ChangeNotifier implements SocketsSubscriber {
     socketsService.submitBet(roomId, bet);
   }
 
+  /// Sends a "startHalftime" event to the server
+  void startHalftime(String roomId, String gmId) {
+    socketsService.startHalftime(roomId, gmId);
+  }
+
   //  Sends a "startGame" event to the server
   void startGame(String roomId, String gmId) {
     socketsService.startGame(roomId, gmId);
@@ -165,6 +170,11 @@ class RoomViewModel extends ChangeNotifier implements SocketsSubscriber {
   //  Sends a "stopBetting" event to the server
   void stopBetting(String roomId, String gmId) {
     socketsService.stopBetting(roomId, gmId);
+  }
+
+  // Sends a "stopHalftime" event to the server
+  void stopHalftime(String roomId, String gmId) {
+    socketsService.stopHalftime(roomId, gmId);
   }
 
   //  Sends a "stopWaiting" event to the server

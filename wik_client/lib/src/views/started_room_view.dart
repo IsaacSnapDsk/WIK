@@ -7,6 +7,7 @@ import 'package:wik_client/src/views/betting_view.dart';
 import 'package:wik_client/src/views/game_master_betting_view.dart';
 import 'package:wik_client/src/views/game_master_results_view.dart';
 import 'package:wik_client/src/views/game_master_waiting_view.dart';
+import 'package:wik_client/src/views/halftime_view.dart';
 import 'package:wik_client/src/views/punishment_view.dart';
 import 'package:wik_client/src/views/results_view.dart';
 import 'package:wik_client/src/views/scoreboard_view.dart';
@@ -50,6 +51,11 @@ class _StartedRoomViewState extends ConsumerState<StartedRoomView> {
 
     //  Get our view model
     vm = ref.watch(roomViewModel);
+
+    //  If we are in half time, show our halftime screen
+    if (_room.half) {
+      return const HalftimeView();
+    }
 
     //  The view depends on what phase we are in
     switch (currentRound.turn) {
@@ -112,6 +118,11 @@ class _StartedRoomViewState extends ConsumerState<StartedRoomView> {
     //  If we don't have a player yet, just return our placeholder
     if (player == null) {
       return _buildPlaceholder();
+    }
+
+    //  If we are in half time, show our halftime screen
+    if (_room.half) {
+      return const HalftimeView();
     }
 
     //  Return a view based on what phase we are in

@@ -105,9 +105,19 @@ class _ScoreboardViewState extends ConsumerState<ScoreboardView> {
                 style: Theme.of(context).textTheme.headlineLarge,
               ),
               if (_gm != null)
-                WikButton(
-                  onPressed: () => vm.nextRound(_room.id, _gm!.id),
-                  text: "Next Round",
+                Column(
+                  children: [
+                    WikButton(
+                      onPressed: () => vm.nextRound(_room.id, _gm!.id),
+                      text: "Next Round",
+                    ),
+                    SizedBox(height: 20),
+                    if (_room.currentRound + 1 == (_room.maxRounds / 2).round())
+                      WikButton(
+                        onPressed: () => vm.startHalftime(_room.id, _gm!.id),
+                        text: 'Start Halftime',
+                      ),
+                  ],
                 ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,

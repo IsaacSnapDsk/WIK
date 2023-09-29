@@ -619,6 +619,84 @@ io.on("connection", (socket) => {
             console.log(`Error changing round ${e}`)
         }
     })
+
+    socket.on("startHalftime", async ({ roomId, gmId }) => {
+        try {
+            //  Grab our current room
+            const room = await roomModel.findById(roomId)
+
+            //  If it isn't found, return an error
+            if (!room) return socket.emit("errorOccurred", "Room not found.")
+
+            //  Find our game master with this secret
+            const gameMaster = await gameMasterModel.findById(gmId)
+
+            //  If it isn't found, return an error
+            if (!gameMaster) return socket.emit("errorOccurred", "Game Master not found")
+
+            //  Check if this game master belongs to this room
+            const belongs = gameMaster.roomId === roomId
+
+            //  If they dont, return an error
+            if (!belongs) return socket.emit("errorOccurred", "Game Master and Room do not match")
+
+            //  Set half time to true baby
+            room.half = true
+
+            //  Save the changes to our room
+            const savedRoom = await room.save()
+
+            //  Return our new room
+            io.to(roomId).emit("changeTurnSuccess", savedRoom)
+        }
+        catch (e) {
+            console.log(`Error starting halftime ${e}`)
+        }
+    })
+
+    socket.on("stopHalftime", async ({ roomId, gmId }) => {
+        try {
+            //  Grab our current room
+            const room = await roomModel.findById(roomId)
+
+            //  If it isn't found, return an error
+            if (!room) return socket.emit("errorOccurred", "Room not found.")
+
+            //  Find our game master with this secret
+            const gameMaster = await gameMasterModel.findById(gmId)
+
+            //  If it isn't found, return an error
+            if (!gameMaster) return socket.emit("errorOccurred", "Game Master not found")
+
+            //  Check if this game master belongs to this room
+            const belongs = gameMaster.roomId === roomId
+
+            //  If they dont, return an error
+            if (!belongs) return socket.emit("errorOccurred", "Game Master and Room do not match")
+
+            //  Set half time to true baby
+            room.half = false
+
+            //  Get our new round
+            const round = new roundModel({
+                no: room.currentRound + 2,
+                turn: 'Betting',
+                bets: [],
+                scores: [],
+            })
+            room.rounds.push(round)
+            room.currentRound++
+
+            //  Save the changes to our room
+            const savedRoom = await room.save()
+
+            //  Return our new room
+            io.to(roomId).emit("changeTurnSuccess", savedRoom)
+        }
+        catch (e) {
+            console.log(`Error stopping halftime ${e}`)
+        }
+    })
 });
 
 mongoose

@@ -102,6 +102,17 @@ class SocketsService {
     );
   }
 
+  /// Sends a "startHalftime" event to our Server
+  void startHalftime(String roomId, String gmId) {
+    _client.emit(
+      'startHalftime',
+      {
+        'roomId': roomId,
+        'gmId': gmId,
+      },
+    );
+  }
+
   /// Sends a "startGame" event to our Server
   void startGame(String roomId, String gmId) {
     _client.emit(
@@ -117,6 +128,17 @@ class SocketsService {
   void stopBetting(String roomId, String gmId) {
     _client.emit(
       'stopBetting',
+      {
+        'roomId': roomId,
+        'gmId': gmId,
+      },
+    );
+  }
+
+  /// Sends a "stopHalftime" event to ur Server
+  void stopHalftime(String roomId, String gmId) {
+    _client.emit(
+      'stopHalftime',
       {
         'roomId': roomId,
         'gmId': gmId,
