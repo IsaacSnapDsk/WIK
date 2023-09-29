@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:wik_client/src/models/room.dart';
 import 'package:wik_client/src/services/room_view_model.dart';
@@ -6,6 +7,17 @@ import 'package:wik_client/src/services/sockets_service.dart';
 import 'package:wik_client/src/views/room_view.dart';
 import 'package:wik_client/src/views/wik_appbar.dart';
 import 'package:wik_client/src/widgets/wik_button.dart';
+
+class UpperCaseTextFormatter extends TextInputFormatter {
+  @override
+  TextEditingValue formatEditUpdate(
+      TextEditingValue oldValue, TextEditingValue newValue) {
+    return TextEditingValue(
+      text: newValue.text.toUpperCase(),
+      selection: newValue.selection,
+    );
+  }
+}
 
 class JoinRoomView extends ConsumerStatefulWidget {
   const JoinRoomView({super.key});
@@ -46,6 +58,9 @@ class _JoinRoomViewState extends ConsumerState<JoinRoomView> {
               const Text("Enter room details below:"),
               TextField(
                 decoration: const InputDecoration(hintText: "Enter room id"),
+                inputFormatters: [
+                  UpperCaseTextFormatter(),
+                ],
                 onChanged: _onRoomIdChanged,
               ),
               TextField(
