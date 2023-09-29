@@ -106,6 +106,14 @@ class _StartedRoomViewState extends ConsumerState<StartedRoomView> {
     //  Grab our current round
     final currentRound = _room.rounds[_room.currentRound];
 
+    //  Track our player
+    final player = ref.watch(roomViewModel).player;
+
+    //  If we don't have a player yet, just return our placeholder
+    if (player == null) {
+      return _buildPlaceholder();
+    }
+
     //  Return a view based on what phase we are in
     switch (currentRound.turn) {
       case 'Betting':

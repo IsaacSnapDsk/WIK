@@ -363,6 +363,18 @@ io.on("connection", (socket) => {
             //  Update the player's bets
             player.bets.push(bet)
 
+            //  If this bet was a BB, decrease from the player's BB stock
+            if (bet.type == 'BB') {
+                player.bbStock--
+                socket.emit('playerCreatedSuccess', player)
+            }
+            //  If this bet was a double shot, set their usedDouble to true
+            if (bet.type == 'Shot' && bet.amount == 2) {
+                player.usedDoubleShot = true
+                socket.emit('playerCreatedSuccess', player)
+
+            }
+
             //  Adds the player's bet to the round
             round.bets.push(bet)
 

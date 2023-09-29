@@ -7,6 +7,7 @@ import 'package:wik_client/src/models/room.dart';
 import 'package:wik_client/src/models/player.dart';
 import 'package:wik_client/src/models/bet.dart';
 import 'package:wik_client/src/models/score.dart';
+import 'package:wik_client/src/util/bet_limit_formatter.dart';
 import 'package:wik_client/src/views/wik_appbar.dart';
 import 'package:wik_client/src/widgets/wik_button.dart';
 
@@ -33,6 +34,9 @@ class _ResultsViewState extends ConsumerState<ResultsView> {
   /// Local room instance
   late Room _room;
 
+  /// The maximum bet we can use
+  int _maxAmt = 1;
+
   /// Determines if we can submit the form or not
   bool _canSubmit = false;
 
@@ -42,11 +46,14 @@ class _ResultsViewState extends ConsumerState<ResultsView> {
   /// Determines if we have submitted or not
   bool _scoreSubmitted = false;
 
+  /// The total number of our bet we have given out
+  int _total = 0;
+
   //Calculates if the player can submit their bet
   void _calcCanSubmit() {
     setState(() {
       // Total punishment amount
-      int total = _scores.values.reduce((a, b) => a + b);
+      final total = _scores.values.reduce((a, b) => a + b);
 
       //  If ANY of our values are null, this is false
       final canSubmit = total == _currentBet.amount;
@@ -185,13 +192,25 @@ class _ResultsViewState extends ConsumerState<ResultsView> {
     return Row(children: [
       Card(child: Text(player.name)),
       Expanded(
-        child: TextField(
-          decoration: const InputDecoration(hintText: "Amount"),
-          keyboardType: TextInputType.number,
-          inputFormatters: <TextInputFormatter>[
-            FilteringTextInputFormatter.digitsOnly
-          ],
-          onChanged: (e) => _onPunishmentChanged(e, player.id),
+        child: Focus(
+          onFocusChange: (bool hasFocus) {
+            if (hasFocus) return;
+            if (_scores.isEmpty) return;
+            setState(() => _total = _scores.values.reduce((a, b) => a + b));
+          },
+          child: TextField(
+            // enabled: _total < _maxAmt || _scores.containsKey(player.id),
+            decoration: const InputDecoration(hintText: "Amount"),
+            keyboardType: TextInputType.number,
+            inputFormatters: <TextInputFormatter>[
+              FilteringTextInputFormatter.digitsOnly,
+
+              /// TODO we need to limit this so it doesn't get bigger
+              /// limit this based on other scores
+              LimitRange(0, _maxAmt)
+            ],
+            onChanged: (e) => _onPunishmentChanged(e, player.id),
+          ),
         ),
       ),
     ]);
@@ -207,6 +226,9 @@ class _ResultsViewState extends ConsumerState<ResultsView> {
 
     //  Find our current bet from the list of bets in the round
     _currentBet = _getCurrentBet()!;
+
+    //  Our max amount comes from our current bet
+    _maxAmt = _currentBet.amount;
 
     //  We won if our current bet matches the current round's bet
     _win = _room.rounds[_room.currentRound].kill! == _currentBet.kill;

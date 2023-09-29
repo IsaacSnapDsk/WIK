@@ -5,11 +5,12 @@ import 'package:wik_client/src/services/room_view_model.dart';
 import 'package:wik_client/src/models/room.dart';
 import 'package:wik_client/src/models/player.dart';
 import 'package:wik_client/src/models/bet.dart';
+import 'package:wik_client/src/util/bet_limit_formatter.dart';
 import 'package:wik_client/src/views/waiting_view.dart';
 import 'package:wik_client/src/views/wik_appbar.dart';
 import 'package:wik_client/src/widgets/wik_button.dart';
 
-const List<String> wagers = <String>['Drink', 'BB', 'Shot'];
+const List<String> wagers = <String>['Drink', 'Shot', 'BB'];
 
 class BettingView extends ConsumerStatefulWidget {
   const BettingView({super.key});
@@ -19,6 +20,9 @@ class BettingView extends ConsumerStatefulWidget {
 }
 
 class _BettingViewState extends ConsumerState<BettingView> {
+  /// The text editing controller to handle our amount
+  final TextEditingController _amountController = TextEditingController();
+
   /// The players choice for the kill/bet
   bool? _kill;
 
@@ -33,6 +37,12 @@ class _BettingViewState extends ConsumerState<BettingView> {
 
   /// Determines if we have selected rock or not
   bool _rock = false;
+
+  /// The max amount the player can bet for the wager
+  int _maxAmt = 10;
+
+  /// Our wagers players can pick from
+  List<String> _filteredWagers = wagers;
 
   /// Local room instance
   late Room _room;
@@ -55,6 +65,20 @@ class _BettingViewState extends ConsumerState<BettingView> {
   void _onWagerChanged(String? val) {
     //  Update our nickname value
     _wager = val!;
+
+    //  Our amout changes depending on what we changed the wager to
+    _maxAmt = switch (val) {
+      'Drink' => 10,
+      'BB' => 1,
+      'Shot' => _player.usedDoubleShot ? 1 : 2,
+      _ => 1,
+    };
+
+    //  Reset our amount
+    _amount = 0;
+
+    //  Reset our form
+    _amountController.clear();
 
     //  Check if we can submit or not
     _calcCanSubmit();
@@ -99,6 +123,10 @@ class _BettingViewState extends ConsumerState<BettingView> {
     /// to get the submited bet from the server
     _room = ref.watch(roomViewModel).room!;
     _player = ref.watch(roomViewModel).player!;
+
+    /// Our filtered wagers will just be our wagers
+    /// UNLESS the player has used all of their BBs
+    _filteredWagers = _player.bbStock > 0 ? wagers : wagers.sublist(0, 2);
 
     /// Find the  player's current bet from the list of bets
     /// in the current round
@@ -198,7 +226,8 @@ class _BettingViewState extends ConsumerState<BettingView> {
               color: Colors.deepPurpleAccent,
             ),
             onChanged: _onWagerChanged,
-            items: wagers.map<DropdownMenuItem<String>>((String value) {
+            items:
+                _filteredWagers.map<DropdownMenuItem<String>>((String value) {
               return DropdownMenuItem<String>(
                 value: value,
                 child: Text(value),
@@ -206,10 +235,12 @@ class _BettingViewState extends ConsumerState<BettingView> {
             }).toList(),
           ),
           TextField(
+            controller: _amountController,
             decoration: const InputDecoration(hintText: "Enter your wager"),
             keyboardType: TextInputType.number,
             inputFormatters: <TextInputFormatter>[
-              FilteringTextInputFormatter.digitsOnly
+              FilteringTextInputFormatter.digitsOnly,
+              LimitRange(0, _maxAmt)
             ],
             onChanged: _onAmountChanged,
           ),

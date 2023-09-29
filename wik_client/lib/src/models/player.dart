@@ -26,6 +26,8 @@ class Player {
     required this.bets,
     required this.scores,
     required this.punished,
+    required this.bbStock,
+    required this.usedDoubleShot,
   });
 
   /// Unique identifier for our player
@@ -57,6 +59,12 @@ class Player {
 
   /// A boolean value telling us if the player has submitted a punishment
   bool punished;
+
+  /// Determines how many beer bongs this player has left to use
+  int bbStock;
+
+  /// Determines if this player has used their double shot yet
+  bool usedDoubleShot;
 
   /// Connect the generated [_$PlayerFromJson] function to the `fromJson`
   /// factory.
