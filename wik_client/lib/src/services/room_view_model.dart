@@ -9,14 +9,20 @@ import 'package:wik_client/src/models/score.dart';
 import 'package:wik_client/src/services/sockets_service.dart';
 import 'package:wik_client/src/services/sockets_subscriber.dart';
 
+final viewModelInitialized = StateProvider<bool>((ref) {
+  return false;
+});
+
 final roomViewModel = ChangeNotifierProvider((ref) {
   return RoomViewModel(
+    ref: ref,
     socketsService: ref.read(socketsService),
   );
 });
 
 class RoomViewModel extends ChangeNotifier implements SocketsSubscriber {
   RoomViewModel({
+    required this.ref,
     required this.socketsService,
   }) {
     //  Subscribe to our sockets service
@@ -25,11 +31,17 @@ class RoomViewModel extends ChangeNotifier implements SocketsSubscriber {
     //  Refresh all of our data
     refresh();
 
+    //  Set our initialized value to true
+    ref.read(viewModelInitialized.notifier).state = true;
+
     return;
   }
 
   /// Our services
   final SocketsService socketsService;
+
+  /// Our ref to reference other providers
+  final Ref ref;
 
   /// Keeps track of our current room
   Room? room;

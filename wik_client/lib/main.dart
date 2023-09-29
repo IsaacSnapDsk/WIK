@@ -6,8 +6,6 @@ import 'package:wik_client/src/services/room_view_model.dart';
 import 'package:wik_client/src/views/create_room_view.dart';
 import 'package:wik_client/src/views/join_room_view.dart';
 import 'package:wik_client/src/views/room_view.dart';
-import 'package:wik_client/src/views/results_view.dart';
-import 'package:wik_client/src/views/scoreboard_view.dart';
 import 'package:wik_client/src/views/wik_appbar.dart';
 import 'package:wik_client/src/widgets/wik_button.dart';
 
@@ -53,24 +51,8 @@ class MyHomePage extends ConsumerStatefulWidget {
 }
 
 class _MyHomePageState extends ConsumerState<MyHomePage> {
-  /// Our view model
-  late RoomViewModel vm;
-
-  ///  Keeps track of our current room
-  late Room? _room;
-
-  @override
-  void initState() {
-    super.initState();
-
-    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-      //  Get our view model
-      vm = ref.watch(roomViewModel);
-
-      vm.subscribeToJoinRoomSuccess(context);
-      vm.subscribeToCreateRoomSuccess(context);
-    });
-  }
+  /// Our current room if we have one
+  Room? _room;
 
   /// Returns a join room button if we already have a room, else provides options
   Widget _buildHomeButtons() {
@@ -121,7 +103,13 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    _room = ref.watch(roomViewModel).room;
+    //  Check if our view model is initialized yet
+    final bool initialized = ref.read(viewModelInitialized);
+
+    //  If our view model is initialized, we can start listening for changes
+    if (initialized) {
+      _room = ref.watch(roomViewModel).room;
+    }
 
     //  Our actual layout
     return Scaffold(

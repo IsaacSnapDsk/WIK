@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:wik_client/src/models/room.dart';
 import 'package:wik_client/src/services/room_view_model.dart';
+import 'package:wik_client/src/services/sockets_service.dart';
 import 'package:wik_client/src/views/room_view.dart';
 import 'package:wik_client/src/views/wik_appbar.dart';
 import 'package:wik_client/src/widgets/wik_button.dart';
@@ -24,24 +25,13 @@ class _CreateRoomViewState extends ConsumerState<CreateRoomView> {
   /// Determines if we can submit the form or not
   bool _canSubmit = false;
 
-  /// Our view model
-  late RoomViewModel vm;
+  /// Determines if we have created our room or not
+  /// This is important as [_room] only becomes reactive
+  /// to changes in our view model when this is true
+  bool _roomCreated = false;
 
   /// Our current room
   Room? _room;
-
-  @override
-  void initState() {
-    super.initState();
-
-    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-      //  Get our view model
-      vm = ref.watch(roomViewModel);
-
-      //  Listen to our game master creation
-      vm.subscribeToGameMasterCreatedSuccess(context);
-    });
-  }
 
   /// Builds our page for when there is NOT a room
   Widget _buildInitialState() {
@@ -72,8 +62,7 @@ class _CreateRoomViewState extends ConsumerState<CreateRoomView> {
                 height: 25,
               ),
               WikButton(
-                onPressed: () =>
-                    _canSubmit ? vm.createRoom(_roomName!, _maxRounds!) : null,
+                onPressed: () => _canSubmit ? _proceed() : null,
                 text: 'Create Room',
               ),
             ],
@@ -92,6 +81,40 @@ class _CreateRoomViewState extends ConsumerState<CreateRoomView> {
       //  Set our value to whether we are falsey or not
       _canSubmit = canSubmit;
     });
+  }
+
+  /// Creates our room and toggles our flag so we can start
+  /// listening to changes to our room
+  void _createRoom(RoomViewModel vm) {
+    //  Create our room
+    vm.createRoom(_roomName!, _maxRounds!);
+
+    //  Now start listening for our room
+    setState(() => _roomCreated = true);
+  }
+
+  /// Initializes our listeners for room creation
+  void _initListeners(RoomViewModel vm) {
+    //  Listen to our game master creation
+    vm.subscribeToGameMasterCreatedSuccess(context);
+
+    //  Listen to our room being created
+    vm.subscribeToCreateRoomSuccess(context);
+
+    //  Subscribe to our room being joined
+    vm.subscribeToJoinRoomSuccess(context);
+  }
+
+  /// Initializes our socket client and room view model
+  RoomViewModel _initSocketClient() {
+    //  Set our identifier to our room name
+    ref.read(socketIdentifier.notifier).state = _roomName;
+
+    //  Get our view model
+    final vm = ref.watch(roomViewModel);
+
+    //  Return our view model instance
+    return vm;
   }
 
   /// Updates our max rounds based on the user input
@@ -115,10 +138,25 @@ class _CreateRoomViewState extends ConsumerState<CreateRoomView> {
     _calcCanSubmit();
   }
 
+  /// Initializes our SocketClient, establishes listeners,
+  /// and creates our room
+  void _proceed() {
+    //  Init our socket client and view model
+    final vm = _initSocketClient();
+
+    //  Init our listeners
+    _initListeners(vm);
+
+    //  Create our room
+    _createRoom(vm);
+  }
+
   @override
   Widget build(BuildContext context) {
     //  Check if we have a room or not
-    _room = ref.watch(roomViewModel).room;
+    if (_roomCreated) {
+      _room = ref.watch(roomViewModel).room;
+    }
 
     //  If we do not have a room, return our initial state
     if (_room == null) {

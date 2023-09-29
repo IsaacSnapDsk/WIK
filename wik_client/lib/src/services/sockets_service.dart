@@ -11,14 +11,22 @@ import 'package:wik_client/src/services/sockets_subscriber.dart';
 
 final socketsService = Provider((ref) => SocketsService(ref));
 
+/// A unique identifier used for authentication
+final socketIdentifier = StateProvider<String?>((ref) => null);
+
 class SocketsService {
-  SocketsService(this.ref);
+  SocketsService(this.ref) {
+    /// Initialize our SocketsClient with our unique identifier
+    _client = SocketsClient(
+      identifier: ref.read(socketIdentifier)!,
+    ).clientSocket!;
+  }
 
   /// This is our ref that we use to gain access to our RoomViewModel
   final Ref ref;
 
   /// This is our current client socket
-  final Socket _client = SocketsClient.instance.clientSocket!;
+  late Socket _client;
 
   /// Variables for our game state
   Room? _room;
