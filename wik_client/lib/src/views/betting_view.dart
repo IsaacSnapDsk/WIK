@@ -191,17 +191,7 @@ class _BettingViewState extends ConsumerState<BettingView> {
                 IconButton(
                   iconSize: 150,
                   icon: const Icon(Icons.do_not_touch),
-                  onPressed: () {
-                    setState(() {
-                      //  TODO this needs to be actual max bet idk how to figure it out tho
-                      _kill = true;
-                      _wager = "Shot";
-                      _amount = 2;
-                      _rock = true;
-                      print('kill: $_kill, wager: $_wager, amount: $_amount');
-                      _onSubmitBet();
-                    });
-                  },
+                  onPressed: _rockBet,
                 ),
               ],
             ),
@@ -260,6 +250,28 @@ class _BettingViewState extends ConsumerState<BettingView> {
     } else {
       return Container();
     }
+  }
+
+  void _rockBet() {
+    setState(() {
+      //  Set everything to the rock defaults
+      _kill = true;
+      _rock = true;
+
+      //  Our wager depends on if we have used our double, and our bb stocks
+      if (!_player.usedDoubleShot) {
+        _wager = "Shot";
+        _amount = 2;
+      } else if (_player.bbStock > 0) {
+        _wager = "BB";
+        _amount = 1;
+      } else {
+        _wager = "Shot";
+        _amount = 1;
+      }
+
+      _onSubmitBet();
+    });
   }
 
   @override
