@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:wik_client/src/services/room_view_model.dart';
 
-class WikAppBar extends StatelessWidget implements PreferredSizeWidget {
+class WikAppBar extends ConsumerWidget implements PreferredSizeWidget {
   const WikAppBar({this.text, super.key});
 
   final String? text;
@@ -9,8 +11,40 @@ class WikAppBar extends StatelessWidget implements PreferredSizeWidget {
   final Size preferredSize = const Size.fromHeight(kToolbarHeight);
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    //  Check if our view model is initialized yet
+    final initialized = ref.watch(viewModelInitialized);
+
+    //  If we are, then get our room
+    final room = initialized ? ref.watch(roomViewModel).room : null;
+
     return AppBar(
+      leadingWidth: 70,
+      leading: room != null
+          ? Container(
+              decoration: BoxDecoration(
+                color: Colors.black.withOpacity(0.75),
+              ),
+              child: Column(
+                children: [
+                  const Text(
+                    "JOIN ID:",
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                  Text(
+                    room.joinId,
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.blueAccent[100],
+                    ),
+                  ),
+                ],
+              ),
+            )
+          : null,
       flexibleSpace: const Image(
         fit: BoxFit.fitWidth,
         image: NetworkImage(

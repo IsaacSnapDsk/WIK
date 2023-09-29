@@ -266,15 +266,23 @@ io.on("connection", (socket) => {
             //  If it isn't found, return an error
             if (!room) return socket.emit("errorOccurred", "Please enter a valid join ID.")
 
+            //  Check if our room has a player with this nickname already
+            const existing = room.players.find((x: Player) => x.name === nickname)
+
+            //  If we do, then our player will be the existing one
             //  Else, we found our room so lets create a player to connect to it
-            const player = new playerModel({
+            const player = existing ?? new playerModel({
                 socketId: socket.id,
                 name: nickname
             })
-            player.save()
 
-            //  Add our player to the room
-            room.players.push(player)
+            //  If our player did not previously exist, save them and add to the room
+            if (!existing) {
+                player.save()
+
+                //  Add our player to the room
+                room.players.push(player)
+            }
 
             //  Save our room
             const savedRoom = await room.save()

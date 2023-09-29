@@ -74,10 +74,6 @@ class _StartedRoomViewState extends ConsumerState<StartedRoomView> {
         return const ScoreboardView();
       default:
         return _buildPlaceholder();
-      // case 'Resulting':
-      //   return const GameMasterResultingView();
-      // case 'Final':
-      //   return const GameMasterFinalView();
     }
   }
 

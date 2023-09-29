@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:wik_client/src/models/game_master.dart';
+import 'package:wik_client/src/models/player.dart';
 import 'package:wik_client/src/models/room.dart';
 import 'package:wik_client/src/services/room_view_model.dart';
 import 'package:wik_client/src/views/started_room_view.dart';
@@ -15,6 +16,8 @@ class RoomView extends ConsumerStatefulWidget {
 }
 
 class _RoomViewState extends ConsumerState<RoomView> {
+  Player? _player;
+
   late Room _room;
 
   late GameMaster? _gm;
@@ -40,6 +43,9 @@ class _RoomViewState extends ConsumerState<RoomView> {
 
   @override
   Widget build(BuildContext context) {
+    //  Listen to our player for changes
+    _player = ref.watch(roomViewModel).player;
+
     //  Listen to our room for changes
     _room = ref.watch(roomViewModel).room!;
 
@@ -63,7 +69,14 @@ class _RoomViewState extends ConsumerState<RoomView> {
               Text("Here's the join ID: ${_room.joinId}"),
               Text("You are in room: ${_room.name}"),
               const Text("Current Players: "),
-              for (final player in _room.players) Text(player.name),
+              for (final player in _room.players)
+                Text(
+                  player.name,
+                  style: TextStyle(
+                    color:
+                        player.id == _player?.id ? Colors.blue : Colors.black,
+                  ),
+                ),
               if (_gm != null)
                 WikButton(
                   onPressed: () => vm.startGame(_room.id, _gm!.id),
