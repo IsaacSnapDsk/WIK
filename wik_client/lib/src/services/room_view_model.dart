@@ -31,9 +31,6 @@ class RoomViewModel extends ChangeNotifier implements SocketsSubscriber {
     //  Refresh all of our data
     refresh();
 
-    //  Set our initialized value to true
-    ref.read(viewModelInitialized.notifier).state = true;
-
     return;
   }
 

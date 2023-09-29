@@ -94,6 +94,9 @@ class _JoinRoomViewState extends ConsumerState<JoinRoomView> {
     //  Get our view model
     final vm = ref.watch(roomViewModel);
 
+    //  Set our initialized value to true
+    ref.read(viewModelInitialized.notifier).state = true;
+
     //  Return our view model instance
     return vm;
   }
