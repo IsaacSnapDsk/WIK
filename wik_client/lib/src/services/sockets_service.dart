@@ -280,4 +280,15 @@ class SocketsService {
       notifySubscribers();
     });
   }
+
+  /// Listens to the "betSuccess" event
+  void roomUpdateSuccessListener(BuildContext context) {
+    _client.on('roomUpdateSuccess', (response) {
+      //  Convert our room into room
+      _room = Room.fromJson(response);
+
+      //  Tell our subscribers to refresh
+      notifySubscribers();
+    });
+  }
 }

@@ -191,6 +191,37 @@ const generateJoinId = (): String => {
 
 /// SOCKET CONNECTION
 io.on("connection", (socket) => {
+
+    //  When disconnecting, we need to set the bool on this player to say they disconnected
+    socket.on('disconnecting', async () => {
+        //  Find the player matching this socket id
+        const player = await playerModel.findOne({ 'socketId': socket.id })
+
+        //  If no player was found, then we're good to just stop
+        if (!player) return
+
+        //  Else, we need to say that this player is now disconnected
+        player.connected = false
+
+        //  Save the changes to our player
+        await player.save()
+
+        //  Find the room this player might be part of
+        const room = await roomModel.findOne({ 'players._id': player.id })
+        //  If no room exists? we're done
+        if (!room) return
+
+        //  Else, update the player in this room too
+        const playerIdx = room.players.findIndex((x) => x.id.toString() === player.id.toString())
+        room.players[playerIdx] = player
+
+        //  Save our room
+        const savedRoom = await room.save()
+
+        //  Let the room know about this
+        io.to(room.id.toString()).emit('roomUpdateSuccess', savedRoom)
+    })
+
     /// Test listener
     /// This will listen to "test" events from our client and then
     /// send a "testSuccess" event to ALL clients connected
@@ -273,7 +304,8 @@ io.on("connection", (socket) => {
             //  Else, we found our room so lets create a player to connect to it
             const player = existing ?? new playerModel({
                 socketId: socket.id,
-                name: nickname
+                name: nickname,
+                connected: true,
             })
 
             //  If our player did not previously exist, save them and add to the room
@@ -283,10 +315,22 @@ io.on("connection", (socket) => {
                 //  Add our player to the room
                 room.players.push(player)
             }
+            //  Else, we should update the state of this existing player
+            else {
+                //  Find the actual player for this id
+                const actual = await playerModel.findById(existing.id)
+
+                actual.connected = true
+                actual.socketId = socket.id
+                actual.save()
+
+                //  Replace this player in our room
+                const playerIdx = room.players.findIndex((x) => x.id.toString() === actual.id.toString())
+                room.players[playerIdx] = actual
+            }
 
             //  Save our room
             const savedRoom = await room.save()
-            console.log('saved room', savedRoom)
 
             //  Grab our room's id
             const roomId = room._id.toString()

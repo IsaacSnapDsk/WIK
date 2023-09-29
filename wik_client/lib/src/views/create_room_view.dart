@@ -103,6 +103,9 @@ class _CreateRoomViewState extends ConsumerState<CreateRoomView> {
 
     //  Subscribe to our room being joined
     vm.subscribeToJoinRoomSuccess(context);
+
+    //  Subscribe to room updates
+    vm.subscribeToRoomUpdateSuccess(context);
   }
 
   /// Initializes our socket client and room view model

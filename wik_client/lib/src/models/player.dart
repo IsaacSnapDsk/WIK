@@ -19,6 +19,7 @@ class Player {
     required this.id,
     required this.name,
     required this.socketId,
+    required this.connected,
     required this.wins,
     required this.drinks,
     required this.shots,
@@ -38,6 +39,10 @@ class Player {
 
   /// The ID of their socket connection, for maintaining connection
   final String socketId;
+
+  /// Determines if this player is connected, mostly meant to manage conneciton states
+  /// This should pretty much always be true on the client
+  final bool connected;
 
   /// A number representing their total number of wins for this player during this game
   int wins;

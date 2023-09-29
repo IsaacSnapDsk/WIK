@@ -128,6 +128,10 @@ class RoomViewModel extends ChangeNotifier implements SocketsSubscriber {
     socketsService.punishmentSuccessListener(context);
   }
 
+  void subscribeToRoomUpdateSuccess(BuildContext context) {
+    socketsService.roomUpdateSuccessListener(context);
+  }
+
   /// EVENTS
 
   //  Sends a "createRoom" event to the server

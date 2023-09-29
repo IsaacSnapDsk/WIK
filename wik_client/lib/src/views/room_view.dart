@@ -41,6 +41,15 @@ class _RoomViewState extends ConsumerState<RoomView> {
     });
   }
 
+  Color _textColor(Player player) {
+    //  If there is a player, then base it off if this is them
+    if (_player != null) {
+      return player.id == _player!.id ? Colors.blue : Colors.black;
+    }
+    //  Else, this is the GM so base it off the connection status
+    return player.connected ? Colors.black : Colors.pink;
+  }
+
   @override
   Widget build(BuildContext context) {
     //  Listen to our player for changes
@@ -71,10 +80,9 @@ class _RoomViewState extends ConsumerState<RoomView> {
               const Text("Current Players: "),
               for (final player in _room.players)
                 Text(
-                  player.name,
+                  '${player.name} ${player.connected ? "" : "(disconnected)"}',
                   style: TextStyle(
-                    color:
-                        player.id == _player?.id ? Colors.blue : Colors.black,
+                    color: _textColor(player),
                   ),
                 ),
               if (_gm != null)

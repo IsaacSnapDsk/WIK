@@ -24,6 +24,9 @@ const playerSchema = new mongoose.Schema({
     socketId: {
         type: String,
     },
+    connected: {
+        type: Boolean
+    },
     wins: {
         type: Number,
         default: 0,
