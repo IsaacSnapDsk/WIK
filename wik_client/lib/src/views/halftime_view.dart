@@ -46,6 +46,14 @@ class _HalfTimeViewState extends ConsumerState<HalftimeView> {
       appBar: const WikAppBar(text: 'HALF TIME...'),
       body: Center(
         child: Container(
+          decoration: BoxDecoration(
+            image: DecorationImage(
+              opacity: 0.3,
+              repeat: ImageRepeat.repeat,
+              image: NetworkImage(
+                  'https://static-cdn.jtvnw.net/emoticons/v2/emotesv2_e043e7c81c964163b915e9cdbbbbd16f/animated/light/3.0'),
+            ),
+          ),
           width: 400,
           padding: const EdgeInsets.all(8.0),
           child: Column(

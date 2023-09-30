@@ -97,7 +97,13 @@ class _ResultsViewState extends ConsumerState<ResultsView> {
 
   Widget _buildLoss() {
     /// TODO make this meaner
-    return const Text("You lost!");
+    return Text(
+      "You lost!",
+      style: TextStyle(
+        fontSize: Theme.of(context).textTheme.headlineSmall!.fontSize,
+        fontWeight: FontWeight.bold,
+      ),
+    );
   }
 
   Widget _buildResults() {
@@ -251,6 +257,7 @@ class _ResultsViewState extends ConsumerState<ResultsView> {
               Text(
                 'The clip was: ${_room.rounds[_room.currentRound].kill! ? "Kill" : "No Kill"}',
                 style: TextStyle(
+                  fontSize: Theme.of(context).textTheme.titleLarge!.fontSize,
                   color: _win ? Colors.blueAccent : Colors.pink,
                 ),
               ),

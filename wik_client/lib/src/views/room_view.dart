@@ -75,7 +75,14 @@ class _RoomViewState extends ConsumerState<RoomView> {
           padding: const EdgeInsets.all(8.0),
           child: Column(
             children: [
-              Text("Here's the join ID: ${_room.joinId}"),
+              const Text("Here's the join ID:"),
+              Text(
+                _room.joinId,
+                style: TextStyle(
+                  fontSize: Theme.of(context).textTheme.titleSmall!.fontSize,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
               Text("You are in room: ${_room.name}"),
               const Text("Current Players: "),
               for (final player in _room.players)
