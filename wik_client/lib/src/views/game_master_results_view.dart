@@ -67,6 +67,16 @@ class GameMasterResultsView extends StatelessWidget {
     );
   }
 
+  bool _canSubmit() {
+    for (int i = 0; i < players.length; i++) {
+      if (players[i].punished == true) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -94,7 +104,7 @@ class GameMasterResultsView extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: WikButton(
-                  onPressed: onStopPunishing,
+                  onPressed: _canSubmit() ? onStopPunishing : null,
                   text: 'Stop Punishing',
                 ),
               ),
