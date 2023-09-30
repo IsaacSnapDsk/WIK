@@ -63,16 +63,28 @@ class _ScoreboardViewState extends ConsumerState<ScoreboardView> {
     final prevRound = _room.rounds[_room.currentRound - 1];
 
     //  Grab the score from the previous round based player id
-    final prevScore =
-        prevRound.scores.firstWhereOrNull((x) => x.playerId == playerId);
+    final prevScores =
+        prevRound.scores.where((x) => x.playerId == playerId).toList();
+
+    //  Get the previous amount based on key
+    int prevAmt = 0;
+
+    for (int i = 0; i < prevScores.length; i++) {
+      prevAmt += switch (key) {
+        'drinks' => prevScores[i].drinks,
+        'shots' => prevScores[i].shots,
+        'bb' => prevScores[i].bb,
+        _ => 0,
+      };
+    }
 
     //  Grab the amount based on key
-    final prevAmt = switch (key) {
-      'drinks' => prevScore!.drinks,
-      'shots' => prevScore!.shots,
-      'bb' => prevScore!.bb,
-      _ => 0,
-    };
+    // final prevAmt = switch (key) {
+    //   'drinks' => prevScore!.drinks,
+    //   'shots' => prevScore!.shots,
+    //   'bb' => prevScore!.bb,
+    //   _ => 0,
+    // };
 
     //  If our current is greater than the previous, make it pink
     if (amt > prevAmt) return Colors.pink;
