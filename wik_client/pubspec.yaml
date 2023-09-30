@@ -71,6 +71,14 @@ flutter:
     - .env
     - lib/src/assets/images/sajamYes.png
     - lib/src/assets/images/sajamNo.png
+    - lib/src/assets/images/glasses.png
+    - lib/src/assets/images/fs.gif
+    - lib/src/assets/images/grinch.png
+    - lib/src/assets/images/guapo.png
+    - lib/src/assets/images/mash.gif
+    - lib/src/assets/images/sol.png
+    - lib/src/assets/images/vibe.gif
+    - lib/src/assets/images/yeowch.gif
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

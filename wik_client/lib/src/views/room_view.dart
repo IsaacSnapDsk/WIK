@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:wik_client/src/models/game_master.dart';
@@ -25,6 +27,17 @@ class _RoomViewState extends ConsumerState<RoomView> {
   /// Our view model
   late RoomViewModel vm;
 
+  final List<String> _images = [
+    'glasses.png',
+    'fs.gif',
+    'grinch.png',
+    'guapo.png',
+    'mash.gif',
+    'sol.png',
+    'vibe.gif',
+    'yeowch.gif',
+  ];
+
   @override
   void initState() {
     super.initState();
@@ -48,6 +61,16 @@ class _RoomViewState extends ConsumerState<RoomView> {
     }
     //  Else, this is the GM so base it off the connection status
     return player.connected ? Colors.black : Colors.pink;
+  }
+
+  String _randomImage() {
+    final rng = Random();
+
+    final idx = rng.nextInt(_images.length);
+
+    final name = _images[idx];
+
+    return 'lib/src/assets/images/$name';
   }
 
   @override
@@ -79,19 +102,45 @@ class _RoomViewState extends ConsumerState<RoomView> {
               Text(
                 _room.joinId,
                 style: TextStyle(
-                  fontSize: Theme.of(context).textTheme.titleSmall!.fontSize,
+                  fontSize: Theme.of(context).textTheme.headlineLarge!.fontSize,
                   fontWeight: FontWeight.bold,
                 ),
               ),
               Text("You are in room: ${_room.name}"),
               const Text("Current Players: "),
-              for (final player in _room.players)
-                Text(
-                  '${player.name} ${player.connected ? "" : "(disconnected)"}',
-                  style: TextStyle(
-                    color: _textColor(player),
-                  ),
-                ),
+              Row(
+                children: [
+                  for (final player in _room.players)
+                    Container(
+                      margin: const EdgeInsets.all(8.0),
+                      decoration: BoxDecoration(
+                        border: Border.all(
+                          color: _textColor(player),
+                        ),
+                        borderRadius: BorderRadius.circular(8.0),
+                      ),
+                      child: Row(
+                        children: [
+                          Image.asset(
+                            _randomImage(),
+                            width: 50,
+                          ),
+                          Text(
+                            '${player.name} ${player.connected ? "" : "(disconnected)"}',
+                            style: TextStyle(
+                              color: _textColor(player),
+                              fontSize: Theme.of(context)
+                                  .textTheme
+                                  .titleLarge!
+                                  .fontSize,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                ],
+              ),
               if (_gm != null)
                 WikButton(
                   onPressed: () => vm.startGame(_room.id, _gm!.id),
