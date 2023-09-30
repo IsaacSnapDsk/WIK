@@ -195,7 +195,7 @@ class _BettingViewState extends ConsumerState<BettingView> {
                 ),
                 IconButton(
                   iconSize: 150,
-                  icon: const Icon(Icons.do_not_touch),
+                  icon: Image.asset('lib/src/assets/images/sajamYes.png'),
                   onPressed: _rockBet,
                 ),
               ],

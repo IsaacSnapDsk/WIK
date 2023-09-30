@@ -44,7 +44,7 @@ class _PunishmentViewState extends ConsumerState<PunishmentView> {
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Text(
-          "Try better next time :/",
+          "Do better next time :/",
           style: TextStyle(
             fontSize: Theme.of(context).textTheme.headlineLarge!.fontSize,
           ),
