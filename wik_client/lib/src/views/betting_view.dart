@@ -44,6 +44,8 @@ class _BettingViewState extends ConsumerState<BettingView> {
   /// Our wagers players can pick from
   List<String> _filteredWagers = wagers;
 
+  bool _betSubmitted = false;
+
   /// Local room instance
   late Room _room;
 
@@ -103,6 +105,9 @@ class _BettingViewState extends ConsumerState<BettingView> {
 
     //  Get our view model
     final vm = ref.watch(roomViewModel);
+
+    //  Set our bet submitted val to true
+    _betSubmitted = true;
 
     //  Submit our bet
     vm.submitBet(_room.id, bet);
@@ -201,7 +206,7 @@ class _BettingViewState extends ConsumerState<BettingView> {
 
       /// If the client does not have the current bet and the player has
       /// chosen kill, show the type and amount
-    } else if (!_rock) {
+    } else if (!_rock && !_betSubmitted) {
       return Column(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
@@ -216,13 +221,14 @@ class _BettingViewState extends ConsumerState<BettingView> {
               color: Colors.deepPurpleAccent,
             ),
             onChanged: _onWagerChanged,
-            items:
-                _filteredWagers.map<DropdownMenuItem<String>>((String value) {
-              return DropdownMenuItem<String>(
-                value: value,
-                child: Text(value),
-              );
-            }).toList(),
+            items: _filteredWagers.map<DropdownMenuItem<String>>(
+              (String value) {
+                return DropdownMenuItem<String>(
+                  value: value,
+                  child: Text(value),
+                );
+              },
+            ).toList(),
           ),
           TextField(
             controller: _amountController,
@@ -282,10 +288,11 @@ class _BettingViewState extends ConsumerState<BettingView> {
       appBar: const WikAppBar(text: 'BETTING...'),
       body: Center(
         child: Container(
-            width: 300,
-            height: 400,
-            padding: const EdgeInsets.all(8.0),
-            child: _buildBetting()),
+          width: 300,
+          height: 400,
+          padding: const EdgeInsets.all(8.0),
+          child: _buildBetting(),
+        ),
       ),
     );
   }
