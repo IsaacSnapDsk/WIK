@@ -57,7 +57,7 @@ const playerSchema = new mongoose.Schema({
     },
     bbStock: {
         type: Number,
-        default: 2
+        default: 1
     },
     usedDoubleShot: {
         type: Boolean,
