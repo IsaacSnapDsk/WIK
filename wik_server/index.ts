@@ -1,8 +1,8 @@
 require('dotenv').config();
 const crypto = require('crypto')
 
-import { Player } from "./src/models/player";
-import { Room } from "./src/models/room";
+import type { Player } from "./src/models/player";
+import type { Room } from "./src/models/room";
 
 // importing modules
 const http = require("http");
