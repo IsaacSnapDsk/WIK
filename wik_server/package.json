@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "will it kill ya",
   "main": "index.ts",
+  "type": "module",
   "scripts": {
     "start": "node index.ts",
     "dev": "nodemon index.ts"
