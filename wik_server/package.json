@@ -5,7 +5,9 @@
   "main": "index.ts",
   "scripts": {
     "start": "node index.ts",
-    "dev": "nodemon index.ts"
+    "dev": "nodemon index.ts",
+    "start-js": "node dist/index.js",
+    "dev-js": "nodemon dist/index.js"
   },
   "author": "",
   "license": "ISC",
