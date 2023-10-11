@@ -7,7 +7,7 @@ const http = require("http");
 const mongoose = require("mongoose");
 
 // const app = express();
-const host = process.env.HOST || "localhost";
+// const host = process.env.HOST || "localhost";
 const port = process.env.PORT || 3000;
 const server = http.createServer();
 var io = require("socket.io")(server);
@@ -77,6 +77,6 @@ mongoose
         console.log('mongoose error', e);
     });
 
-server.listen(port, host, () => {
+server.listen(port, () => {
     console.log(`Server started and running on port ${port}`);
 });

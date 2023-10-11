@@ -3,7 +3,7 @@ require('dotenv').config();
 var http = require("http");
 var mongoose = require("mongoose");
 // const app = express();
-var host = process.env.HOST || "localhost";
+// const host = process.env.HOST || "localhost";
 var port = process.env.PORT || 3000;
 var server = http.createServer();
 var io = require("socket.io")(server);
@@ -39,6 +39,6 @@ mongoose
     .catch(function (e) {
     console.log('mongoose error', e);
 });
-server.listen(port, host, function () {
+server.listen(port, function () {
     console.log("Server started and running on port ".concat(port));
 });
