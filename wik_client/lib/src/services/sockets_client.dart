@@ -28,7 +28,7 @@ class SocketsClient {
   // }
   factory SocketsClient({required String identifier}) {
     _instance.clientSocket =
-        IO.io('http://${dotenv.env['HOST']}:3000', <String, dynamic>{
+        IO.io('http://${dotenv.env['HOST']}', <String, dynamic>{
       //   //  We have to specify "websocket" under transports to allow connection via web
       'transports': ['websocket'],
       'autoConnect': false,
