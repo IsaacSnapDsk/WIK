@@ -4,7 +4,7 @@ var http = require("http");
 var mongoose = require("mongoose");
 // const app = express();
 // const host = process.env.HOST || "localhost";
-var port = process.env.PORT || 3000;
+var port = process.env.PORT || 8080;
 var server = http.createServer();
 var io = require("socket.io")(server);
 var _a = require("./src/methods/methods")(io), disconnecting = _a.disconnecting, createRoom = _a.createRoom, joinRoom = _a.joinRoom, startGame = _a.startGame, submitBet = _a.submitBet, stopBetting = _a.stopBetting, stopWaiting = _a.stopWaiting, stopPunishing = _a.stopPunishing, submitScores = _a.submitScores, nextRound = _a.nextRound, startHalftime = _a.startHalftime, stopHalftime = _a.stopHalftime;
