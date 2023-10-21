@@ -95,6 +95,9 @@ class _RoomViewState extends ConsumerState<RoomView> {
       appBar: const WikAppBar(text: 'WAITING FOR PLAYERS...'),
       body: Center(
         child: Container(
+          constraints: BoxConstraints(
+            maxHeight: MediaQuery.of(context).size.height,
+          ),
           padding: const EdgeInsets.all(8.0),
           child: Column(
             children: [
@@ -108,38 +111,51 @@ class _RoomViewState extends ConsumerState<RoomView> {
               ),
               Text("You are in room: ${_room.name}"),
               const Text("Current Players: "),
-              Row(
-                children: [
-                  for (final player in _room.players)
-                    Container(
-                      margin: const EdgeInsets.all(8.0),
-                      decoration: BoxDecoration(
-                        border: Border.all(
-                          color: _textColor(player),
-                        ),
-                        borderRadius: BorderRadius.circular(8.0),
-                      ),
-                      child: Row(
-                        children: [
-                          Image.asset(
-                            _randomImage(),
-                            width: 50,
+              Container(
+                constraints: BoxConstraints(
+                  maxHeight: MediaQuery.of(context).size.height * 0.5,
+                ),
+                child: SingleChildScrollView(
+                  child: Wrap(
+                    children: [
+                      for (final player in _room.players)
+                        Container(
+                          constraints: BoxConstraints(
+                            maxWidth: MediaQuery.of(context).size.width * 0.95,
                           ),
-                          Text(
-                            '${player.name} ${player.connected ? "" : "(disconnected)"}',
-                            style: TextStyle(
+                          margin: const EdgeInsets.all(8.0),
+                          decoration: BoxDecoration(
+                            border: Border.all(
                               color: _textColor(player),
-                              fontSize: Theme.of(context)
-                                  .textTheme
-                                  .titleLarge!
-                                  .fontSize,
-                              fontWeight: FontWeight.bold,
                             ),
+                            borderRadius: BorderRadius.circular(8.0),
                           ),
-                        ],
-                      ),
-                    ),
-                ],
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Image.asset(
+                                _randomImage(),
+                                width: 50,
+                              ),
+                              Flexible(
+                                child: Text(
+                                  '${player.name} ${player.connected ? "" : "(disconnected)"}',
+                                  style: TextStyle(
+                                    color: _textColor(player),
+                                    fontSize: Theme.of(context)
+                                        .textTheme
+                                        .titleLarge!
+                                        .fontSize,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
               ),
               if (_gm != null)
                 WikButton(
