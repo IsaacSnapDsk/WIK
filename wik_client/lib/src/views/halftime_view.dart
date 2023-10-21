@@ -43,7 +43,7 @@ class _HalfTimeViewState extends ConsumerState<HalftimeView> {
     final vm = ref.watch(roomViewModel);
 
     return Scaffold(
-      appBar: const WikAppBar(text: 'HALF TIME...'),
+      appBar: WikAppBar(text: 'HALF TIME...'),
       body: Center(
         child: Container(
           decoration: BoxDecoration(

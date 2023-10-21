@@ -91,6 +91,18 @@ class SocketsService {
     );
   }
 
+  //  Sends a "removePlayer" event to our Server
+  void removePlayer(String roomId, String gmId, String playerId) {
+    _client.emit(
+      'removePlayer',
+      {
+        'roomId': roomId,
+        'gmId': gmId,
+        'playerId': playerId,
+      },
+    );
+  }
+
   //  Sends a "submitBet" event to our Server
   void submitBet(String roomId, Bet bet) {
     _client.emit(

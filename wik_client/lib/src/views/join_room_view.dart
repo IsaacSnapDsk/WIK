@@ -46,7 +46,7 @@ class _JoinRoomViewState extends ConsumerState<JoinRoomView> {
 
   Widget _buildInitialState() {
     return Scaffold(
-      appBar: const WikAppBar(text: 'JOIN ROOM...'),
+      appBar: WikAppBar(text: 'JOIN ROOM...'),
       body: Center(
         child: Container(
           width: 300,

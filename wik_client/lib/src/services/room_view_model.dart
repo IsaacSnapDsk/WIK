@@ -155,6 +155,12 @@ class RoomViewModel extends ChangeNotifier implements SocketsSubscriber {
     socketsService.nextRound(roomId, gmId);
   }
 
+  //  Removes a given player
+  void removePlayer(String roomId, String gmId, String playerId) {
+    //  Tells our sockets service we want to remove this player
+    socketsService.removePlayer(roomId, gmId, playerId);
+  }
+
   // Sends a "bet" event to the server
   void submitBet(String roomId, Bet bet) {
     //  Tell our sockets service we want to bet

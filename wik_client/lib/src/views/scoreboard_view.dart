@@ -106,7 +106,7 @@ class _ScoreboardViewState extends ConsumerState<ScoreboardView> {
 
     //  Else return our waiting room
     return Scaffold(
-      appBar: const WikAppBar(),
+      appBar: WikAppBar(),
       body: Center(
         child: Container(
           padding: const EdgeInsets.all(8.0),

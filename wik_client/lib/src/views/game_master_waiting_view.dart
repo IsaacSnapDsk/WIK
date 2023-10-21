@@ -13,7 +13,7 @@ class GameMasterWaitingView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: const WikAppBar(text: 'WAITING...'),
+      appBar: WikAppBar(text: 'WAITING...'),
       body: Center(
         child: Container(
           padding: const EdgeInsets.all(8.0),

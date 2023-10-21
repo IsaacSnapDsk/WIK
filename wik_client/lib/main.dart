@@ -113,7 +113,7 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
 
     //  Our actual layout
     return Scaffold(
-      appBar: const WikAppBar(),
+      appBar: WikAppBar(),
       body: Center(
         child: Padding(
           padding: const EdgeInsets.all(8.0),

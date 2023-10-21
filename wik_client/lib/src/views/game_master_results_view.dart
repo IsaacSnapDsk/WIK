@@ -80,7 +80,7 @@ class GameMasterResultsView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: const WikAppBar(text: 'PUNISHING...'),
+      appBar: WikAppBar(text: 'PUNISHING...'),
       body: Center(
         child: Container(
           padding: const EdgeInsets.all(8.0),

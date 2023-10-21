@@ -162,7 +162,7 @@ class _PunishmentViewState extends ConsumerState<PunishmentView> {
 
     //  Else return our waiting room
     return Scaffold(
-      appBar: const WikAppBar(),
+      appBar: WikAppBar(),
       body: Center(
         child: Container(
           decoration: _needPunishment()

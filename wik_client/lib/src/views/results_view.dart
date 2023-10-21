@@ -108,7 +108,7 @@ class _ResultsViewState extends ConsumerState<ResultsView> {
 
   Widget _buildResults() {
     //  If we have submitted, just return a success message
-    if (_scoreSubmitted) return _buildSuccess();
+    if (_scoreSubmitted || !_player.punished) return _buildSuccess();
 
     //  We can give them a nice layout
     return Column(
@@ -240,7 +240,7 @@ class _ResultsViewState extends ConsumerState<ResultsView> {
     _win = _room.rounds[_room.currentRound].kill! == _currentBet.kill;
 
     return Scaffold(
-      appBar: const WikAppBar(text: 'RESULTS...'),
+      appBar: WikAppBar(text: 'RESULTS...'),
       body: Center(
         child: Container(
           width: 400,

@@ -36,7 +36,7 @@ class _CreateRoomViewState extends ConsumerState<CreateRoomView> {
   /// Builds our page for when there is NOT a room
   Widget _buildInitialState() {
     return Scaffold(
-      appBar: const WikAppBar(text: 'CREATE A ROOM...'),
+      appBar: WikAppBar(text: 'CREATE A ROOM...'),
       body: Center(
         child: Container(
           width: 300,

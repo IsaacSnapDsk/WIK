@@ -285,7 +285,7 @@ class _BettingViewState extends ConsumerState<BettingView> {
     //  Load our view model
     // final vm = ref.watch(roomViewModel);
     return Scaffold(
-      appBar: const WikAppBar(text: 'BETTING...'),
+      appBar: WikAppBar(text: 'BETTING...'),
       body: Center(
         child: Container(
           width: 300,

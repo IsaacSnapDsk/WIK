@@ -61,7 +61,7 @@ class GameMasterBettingView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: const WikAppBar(text: 'BETTING...'),
+      appBar: WikAppBar(text: 'BETTING...'),
       body: Center(
         child: Container(
           padding: const EdgeInsets.all(8.0),

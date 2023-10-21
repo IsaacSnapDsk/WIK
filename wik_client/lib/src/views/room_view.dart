@@ -92,7 +92,9 @@ class _RoomViewState extends ConsumerState<RoomView> {
 
     //  Else return our waiting room
     return Scaffold(
-      appBar: const WikAppBar(text: 'WAITING FOR PLAYERS...'),
+      appBar: WikAppBar(
+        text: 'WAITING FOR PLAYERS...',
+      ),
       body: Center(
         child: Container(
           constraints: BoxConstraints(
