@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -135,14 +136,8 @@ class _BettingViewState extends ConsumerState<BettingView> {
 
     /// Find the  player's current bet from the list of bets
     /// in the current round
-    Bet? currentBet;
-    final bets = _room.rounds[_room.currentRound].bets;
-    for (final bet in bets) {
-      if (bet.playerId == _player.id) {
-        currentBet = bet;
-        break;
-      }
-    }
+    final currentBet = _room.rounds[_room.currentRound].bets
+        .firstWhereOrNull((x) => x.playerId == _player.id);
 
     // If client has the current bet, show the waiting view
     if (currentBet != null) {

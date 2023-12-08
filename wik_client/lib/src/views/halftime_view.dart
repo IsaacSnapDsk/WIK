@@ -54,7 +54,7 @@ class _HalfTimeViewState extends ConsumerState<HalftimeView> {
                   'https://static-cdn.jtvnw.net/emoticons/v2/emotesv2_e043e7c81c964163b915e9cdbbbbd16f/animated/light/3.0'),
             ),
           ),
-          width: 400,
+          width: MediaQuery.of(context).size.width,
           padding: const EdgeInsets.all(8.0),
           child: Column(
             children: [

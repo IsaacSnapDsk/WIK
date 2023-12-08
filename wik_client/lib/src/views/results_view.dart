@@ -108,7 +108,7 @@ class _ResultsViewState extends ConsumerState<ResultsView> {
 
   Widget _buildResults() {
     //  If we have submitted, just return a success message
-    if (_scoreSubmitted || !_player.punished) return _buildSuccess();
+    if (_scoreSubmitted) return _buildSuccess();
 
     //  We can give them a nice layout
     return Column(
@@ -172,6 +172,13 @@ class _ResultsViewState extends ConsumerState<ResultsView> {
         ),
       ),
     );
+  }
+
+  void _calcSubmitted() {
+    //  If our current player has already punished AND they won, then we submitted
+    if (!_player.punished && _win) {
+      setState(() => _scoreSubmitted = true);
+    }
   }
 
   Bet? _getCurrentBet() {
@@ -238,6 +245,9 @@ class _ResultsViewState extends ConsumerState<ResultsView> {
 
     //  We won if our current bet matches the current round's bet
     _win = _room.rounds[_room.currentRound].kill! == _currentBet.kill;
+
+    //  We want to check if the player has already submitted
+    _calcSubmitted();
 
     return Scaffold(
       appBar: WikAppBar(text: 'RESULTS...'),
